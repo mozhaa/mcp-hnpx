@@ -1,0 +1,629 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<book id="b3k9m7">
+  <summary>A story about high school students and the mysterious Boogiepop legend.</summary>
+  
+  <chapter id="c8p2q5" title="Boogiepop" pov="suema">
+    <summary>Students discuss the Boogiepop legend, and one claims to see the mysterious figure on the school roof.</summary>
+    
+    <sequence id="s4r7t9" loc="School cafeteria" time="lunch" pov="suema">
+      <summary>Lunch conversation about the Boogiepop legend and rumors about Kirima Nagi.</summary>
+      
+      <beat id="b1v6x3">
+        <summary>Introduction to the Boogiepop rumor.</summary>
+        
+        <paragraph id="p9m5k2" mode="narration">
+          <summary>The narrator introduces the Boogiepop rumor spreading among students.</summary>
+          Recently, a strange rumor, or rather, a bit of a ghost story, has been spreading among the girls of the second year classes.
+        </paragraph>
+        
+        <paragraph id="p2n8j4" mode="narration">
+          <summary>Description of Boogiepop's appearance and purpose.</summary>
+          It's something about the mysterious Boogiepop. Boogiepop is short, wears a black cape, and has a tall hat that's sort of like the one Maetel wore in Galaxy Express 999, only narrower. He's an assassin, and he can kill people instantly, without pain. He always does so when you are at your most beautiful, before you start to wither away, before you grow old and ugly.
+        </paragraph>
+        
+        <paragraph id="p7q3w1" mode="narration">
+          <summary>The connection between Boogiepop and missing girls.</summary>
+          Nobody knows where he's from, but most people seem to agree that he has something to do with the string of missing high school girls in the area.
+        </paragraph>
+        
+        <paragraph id="p5f2z8" mode="internal" char="suema">
+          <summary>The narrator's thoughts on why people believe in such stories.</summary>
+          Everyone wants to believe that the runaways were killed by an assassin that wanders in the shadows, fleeting like the morning mist, instead of running off to Tokyo or some other grim reality. Reality is always rather dreary. When people vanish from it, it's natural to want to connect them to some sort of fantasy, to some other world.
+        </paragraph>
+      </beat>
+      
+      <beat id="b6u9y4">
+        <summary>Conversation about The Village of Eight Graves.</summary>
+        
+        <paragraph id="p3h7s1" mode="dialogue" char="kyoko">
+          <summary>Kyoko asks about The Village of Eight Graves.</summary>
+          "Hey, Suema, what was the actual case that inspired The Village of Eight Graves?"
+        </paragraph>
+        
+        <paragraph id="p8k4d6" mode="dialogue" char="suema">
+          <summary>Suema answers immediately.</summary>
+          "The Tsuyama Thirty," I said, without a second's thought.
+        </paragraph>
+        
+        <paragraph id="p1l5e9" mode="dialogue" char="kyoko">
+          <summary>Kyoko confirms the answer fits.</summary>
+          "Hunh, Tsuyama Thirty—hey, it fits. Thanks."
+        </paragraph>
+        
+        <paragraph id="p4m2t7" mode="dialogue" char="classmate1">
+          <summary>Classmates express surprise at Suema's knowledge.</summary>
+          "How did you know that?"
+        </paragraph>
+        
+        <paragraph id="p9n3w5" mode="dialogue" char="classmate2">
+          <summary>Classmate comments on Suema's interests.</summary>
+          "You are obsessed."
+        </paragraph>
+        
+        <paragraph id="p2o6v1" mode="dialogue" char="classmate3">
+          <summary>Another classmate's reaction.</summary>
+          "Don't be stupid, everyone knows that."
+        </paragraph>
+        
+        <paragraph id="p7p8r3" mode="dialogue" char="classmate4">
+          <summary>Classmates admit they don't know.</summary>
+          "We don't! Nobody does!"
+        </paragraph>
+        
+        <paragraph id="p5q1z4" mode="dialogue" char="suema">
+          <summary>Suema explains how she knows.</summary>
+          "There was a book on it out last month," I replied, in a knowing manner as if to brush them off.
+        </paragraph>
+        
+        <paragraph id="p8s2x6" mode="dialogue" char="classmate5">
+          <summary>Classmates react to Suema's explanation.</summary>
+          "We didn't read it! Why would we?"
+        </paragraph>
+        
+        <paragraph id="p3t5y9" mode="dialogue" char="classmate6">
+          <summary>Classmate calls Suema scary.</summary>
+          "You're a little scary, Kazuko."
+        </paragraph>
+        
+        <paragraph id="p6u7w2" mode="narration">
+          <summary>Everyone laughs at Suema.</summary>
+          Everyone cackled.
+        </paragraph>
+      </beat>
+      
+      <beat id="b9v4f8">
+        <summary>Discussion about Kirima Nagi.</summary>
+        
+        <paragraph id="p2x1g5" mode="dialogue" char="kyoko">
+          <summary>Kyoko asks about who might be a killer in their class.</summary>
+          "What kind of person can murder someone?" Kyoko asked, suddenly looking up from her crossword again.
+        </paragraph>
+        
+        <paragraph id="p7y3h6" mode="dialogue" char="suema">
+          <summary>Suema's general response.</summary>
+          "What kind? All kinds."
+        </paragraph>
+        
+        <paragraph id="p4z8j1" mode="dialogue" char="kyoko">
+          <summary>Kyoko clarifies her question.</summary>
+          "I mean, like, who in this class seems likely to?" she said, lowering her voice.
+        </paragraph>
+        
+        <paragraph id="p9a2k3" mode="dialogue" char="classmate1">
+          <summary>Classmate urges Kyoko to continue.</summary>
+          "Oooh, do tell, do tell!" Everyone leaned closer.
+        </paragraph>
+        
+        <paragraph id="p5b7l4" mode="dialogue" char="kyoko">
+          <summary>Kyoko describes someone who might be a killer.</summary>
+          "Uhhh, someone a little stiff, like they're off in their own little world and are kinda stubborn when it comes to stuff?" Even as I said it, I knew I might as well be saying her name.
+        </paragraph>
+        
+        <paragraph id="p8c6m9" mode="dialogue" char="classmate2">
+          <summary>Classmate suggests Kirima Nagi.</summary>
+          "So…Kirima Nagi?" Yep, first name out; the most notorious student in our class. She was skipping today, apparently; no sign of her all morning.
+        </paragraph>
+        
+        <paragraph id="p3d1n2" mode="dialogue" char="classmate3">
+          <summary>Classmate agrees Nagi isn't normal.</summary>
+          "Hmm, well, she's not normal, that's for sure."
+        </paragraph>
+        
+        <paragraph id="p6e5o7" mode="dialogue" char="classmate4">
+          <summary>Classmate calls Nagi the Fire Witch.</summary>
+          "Not normal? The Fire Witch is six kinds of crazy!"
+        </paragraph>
+        
+        <paragraph id="p1f8p3" mode="dialogue" char="classmate5">
+          <summary>Classmate mentions Nagi's absences.</summary>
+          "She's skipped two days since the new term started. Wonder if she'll even bother coming tomorrow…"
+        </paragraph>
+        
+        <paragraph id="p4g2q6" mode="dialogue" char="classmate6">
+          <summary>Classmate describes Nagi's behavior at school.</summary>
+          "She might as well not. Even when she does come, she causes trouble the moment she steps through the gates and gets herself sent right back home."
+        </paragraph>
+        
+        <paragraph id="p9h7r1" mode="dialogue" char="classmate7">
+          <summary>Classmate laughs at Nagi's behavior.</summary>
+          "Kya ha ha! Sounds like her!"
+        </paragraph>
+        
+        <paragraph id="p5i3s4" mode="dialogue" char="classmate8">
+          <summary>Classmate suggests Nagi might be a killer.</summary>
+          "So far as killing goes, I hear she actually is."
+        </paragraph>
+        
+        <paragraph id="p8j6t9" mode="dialogue" char="classmate9">
+          <summary>Classmate asks for details.</summary>
+          "How so?"
+        </paragraph>
+        
+        <paragraph id="p2k1u5" mode="dialogue" char="classmate10">
+          <summary>Classmate suggests Nagi might have had an abortion.</summary>
+          "You know, one slip and you miss your period…"
+        </paragraph>
+        
+        <paragraph id="p7l4v8" mode="dialogue" char="classmate11">
+          <summary>Classmate continues the speculation.</summary>
+          "Ah!"
+        </paragraph>
+        
+        <paragraph id="p4m7w2" mode="dialogue" char="classmate12">
+          <summary>Classmate suggests Nagi gets suspended to hide it.</summary>
+          "Then she gets herself suspended before anyone notices and takes care of it…"
+        </paragraph>
+        
+        <paragraph id="p9n3x6" mode="dialogue" char="classmate13">
+          <summary>Classmate believes the rumor.</summary>
+          "I believe it!"
+        </paragraph>
+        
+        <paragraph id="p5o8y1" mode="narration">
+          <summary>The narrator notes there's no evidence but they keep talking.</summary>
+          There was no evidence at all, but that didn't stop them from talking.
+        </paragraph>
+        
+        <paragraph id="p8p2z4" mode="narration">
+          <summary>Everyone laughs, including the narrator.</summary>
+          Everyone was laughing, though, so I laughed with them.
+        </paragraph>
+        
+        <paragraph id="p3q7a5" mode="internal" char="suema">
+          <summary>The narrator's thoughts about Nagi.</summary>
+          I didn't hate her like they did. Sure, she was trouble. But there was something about the way that she looked at people that was pretty cool; the way she didn't seem to care whether you were older or even a teacher, but just looked straight at you.
+        </paragraph>
+        
+        <paragraph id="p6r9b8" mode="dialogue" char="classmate14">
+          <summary>Classmate asks about Nagi's parents.</summary>
+          "She's got no parents, right?"
+        </paragraph>
+        
+        <paragraph id="p1s4c2" mode="dialogue" char="classmate15">
+          <summary>Classmate shares information about Nagi's family.</summary>
+          "Yeah, like, they live abroad or something? You heard she was the top scorer on the entrance exam, right? But she wasn't the speaker at the entrance ceremony. Know why?"
+        </paragraph>
+        
+        <paragraph id="p4t7d3" mode="dialogue" char="classmate16">
+          <summary>Classmate asks why Nagi wasn't the speaker.</summary>
+          "Why?"
+        </paragraph>
+        
+        <paragraph id="p9u1e6" mode="dialogue" char="classmate17">
+          <summary>Classmate explains about Nagi's guardian.</summary>
+          "Her guardian's name isn't Kirima."
+        </paragraph>
+        
+        <paragraph id="p5v8f9" mode="dialogue" char="classmate18">
+          <summary>Classmate suggests Nagi is illegitimate.</summary>
+          "She's illegitimate?"
+        </paragraph>
+        
+        <paragraph id="p8w2g1" mode="dialogue" char="classmate19">
+          <summary>Classmate confirms and adds more details.</summary>
+          "Yeah. She just gets money and lives by herself in some apartment."
+        </paragraph>
+        
+        <paragraph id="p2x5h4" mode="dialogue" char="classmate20">
+          <summary>Classmate expresses disbelief.</summary>
+          "No way…"
+        </paragraph>
+        
+        <paragraph id="p7y8i7" mode="dialogue" char="classmate21">
+          <summary>Classmate speculates about what Nagi could do.</summary>
+          "So, she can do whatever she wants. Bring a different guy home every day, or like Suema says, 'Start killing.' She could have a mountain of bodies at her place, and no one would ever know."
+        </paragraph>
+        
+        <paragraph id="p4z3j0" mode="dialogue" char="classmate22">
+          <summary>Classmate asks where the bodies would be.</summary>
+          "In the freezer?"
+        </paragraph>
+        
+        <paragraph id="p9a6k5" mode="dialogue" char="classmate23">
+          <summary>Classmate continues the gruesome speculation.</summary>
+          "All frozen up."
+        </paragraph>
+        
+        <paragraph id="p5b9l8" mode="dialogue" char="classmate24">
+          <summary>Classmate adds more details.</summary>
+          "Thaws them out and cooks them!"
+        </paragraph>
+        
+        <paragraph id="p8c2m1" mode="dialogue" char="classmate25">
+          <summary>Classmate expresses disgust.</summary>
+          "Ew, gross!"
+        </paragraph>
+        
+        <paragraph id="p3d7n4" mode="narration">
+          <summary>Everyone laughs again.</summary>
+          Everyone laughed again.
+        </paragraph>
+        
+        <paragraph id="p6e0o9" mode="narration">
+          <summary>The narrator goes along with them.</summary>
+          I went along with them.
+        </paragraph>
+        
+        <paragraph id="p1f5p2" mode="narration">
+          <summary>Yurihara-san glares at them.</summary>
+          We laughed a bit too loud and Yurihara-san, who was sitting nearby, looked up from her study guide and glared at us. She was the best student in the class…and in the running for top of the school. I'd heard she'd taken practice tests at her cram school, and outscored students from the best schools in town three times running. She was also beautiful…and a little stuck up—meaning that she had no friends in our class. Even though she might've felt a little out of our league, she somehow knew that all it took was a cold glance to quiet us down.
+        </paragraph>
+        
+        <paragraph id="p4g8q6" mode="dialogue" char="kyoko">
+          <summary>Kyoko suggests Nagi might be Boogiepop.</summary>
+          "Maybe Nagi is Boogiepop?" Kyoko said.
+        </paragraph>
+        
+        <paragraph id="p9h1r9" mode="dialogue" char="classmate26">
+          <summary>Classmate disagrees about Boogiepop's appearance.</summary>
+          "Ew, no. Boogiepop's a beautiful boy."
+        </paragraph>
+        
+        <paragraph id="p5i4s3" mode="narration">
+          <summary>The narrator's first encounter with the name Boogiepop.</summary>
+          At the time, that was my first encounter with that name, so I felt myself compelled to ask about it.
+        </paragraph>
+        
+        <paragraph id="p8j7t6" mode="dialogue" char="classmate27">
+          <summary>Classmate is surprised the narrator doesn't know about Boogiepop.</summary>
+          "You don't know? But he's a killer!"
+        </paragraph>
+        
+        <paragraph id="p2k0u9" mode="dialogue" char="suema">
+          <summary>The narrator defends herself.</summary>
+          "It's not like I know everything."
+        </paragraph>
+        
+        <paragraph id="p7l5v2" mode="narration">
+          <summary>The narrator's thoughts on the Boogiepop story.</summary>
+          They filled me in, but I'm into criminal psychology, and this was just some school horror story. God, it was beyond absurd. They made it out to be less of a serial killer and more like some crazed monster.
+        </paragraph>
+        
+        <paragraph id="p4m8w5" mode="dialogue" char="suema">
+          <summary>The narrator pretends to be alarmed.</summary>
+          "Hmm… That's kinda scary." Everyone was watching, so I had to pretend to be alarmed.
+        </paragraph>
+        
+        <paragraph id="p9n1x8" mode="dialogue" char="classmate28">
+          <summary>Classmate finds Boogiepop attractive.</summary>
+          "Kind of a turn-on, huh? Wonder how he kills them?" With that, they all started babbling away, swooning over this fantasy man of theirs.
+        </paragraph>
+        
+        <paragraph id="p5o4y1" mode="narration">
+          <summary>The narrator gets irritated by their speculation.</summary>
+          Did he strangle them? Run them through with a knife? They kept suggesting rather time-consuming methods of killing, and I started to get irritated.
+        </paragraph>
+        
+        <paragraph id="p8p7z4" mode="dialogue" char="kyoko">
+          <summary>Kyoko asks for the narrator's expert opinion.</summary>
+          "Can we get your expert opinion?" Kyoko asked teasingly, suddenly turning to me.
+        </paragraph>
+        
+        <paragraph id="p3q0a7" mode="dialogue" char="suema">
+          <summary>The narrator suggests poison gas.</summary>
+          "Sure…poison gas."
+        </paragraph>
+        
+        <paragraph id="p6r5b0" mode="dialogue" char="classmates">
+          <summary>Classmates react to the suggestion.</summary>
+          "Ew, like Sarin?" They all said at once.
+        </paragraph>
+        
+        <paragraph id="p1s8c3" mode="dialogue" char="suema">
+          <summary>The narrator specifies the type of poison gas.</summary>
+          "Nah, hydrocyanic acid gas. It's colorless and invisible, but very poisonous, and it kills you instantly. You can spray it on someone, and it vanishes quickly, leaving no evidence. The body isn't even dirty. Smells like peaches."
+        </paragraph>
+        
+        <paragraph id="p4t2d6" mode="narration">
+          <summary>Classmates are creeped out by the narrator's knowledge.</summary>
+          "Hunh…?" Everyone was staring at me, slightly creeped out.
+        </paragraph>
+        
+        <paragraph id="p9u9e9" mode="internal" char="suema">
+          <summary>The narrator realizes she's made a mistake.</summary>
+          Oops, I thought. I'd done it again. I knew full well this kind of knowledge wouldn't interest them.
+        </paragraph>
+        
+        <paragraph id="p5v3f2" mode="narration">
+          <summary>Kimura-kun approaches the group.</summary>
+          At this point, the class lady killer, Kimura-kun, came over and said, "What's up?" Everyone replied, "Nothing…" Apparently the Boogiepop stories were being kept secret from the boys.
+        </paragraph>
+        
+        <paragraph id="p8w6g5" mode="internal" char="suema">
+          <summary>The narrator feels like the last to know about the rumor.</summary>
+          A myth only the girls knew. It seemed I was the last one in class to hear about it. I always am.
+        </paragraph>
+        
+        <paragraph id="p2x9h8" mode="narration">
+          <summary>The narrator feels depressed and only half-listens.</summary>
+          "………" That depressed me a little, so I only half listened to their conversation, nodding when it seemed appropriate.
+        </paragraph>
+      </beat>
+      
+      <beat id="b1y3j6">
+        <summary>The narrator reflects on her past experience.</summary>
+        
+        <paragraph id="p7z4k0" mode="narration">
+          <summary>The narrator explains her interest in criminal psychology.</summary>
+          My interest in criminal and abnormal psychology stems from a personal experience I had.
+        </paragraph>
+        
+        <paragraph id="p4a7l3" mode="narration">
+          <summary>The narrator describes almost being killed five years ago.</summary>
+          Five years ago, in seventh grade, I was almost killed. There was a serial killer hiding in our town, and he killed himself just when the police were about to catch him.
+        </paragraph>
+        
+        <paragraph id="p9b0m6" mode="narration">
+          <summary>The narrator explains the killer's interest in her.</summary>
+          The killer took sexual pleasure in killing, which is freaky enough, but among the notes that he left behind was one with my address and a detailed account of the route that I took to school.
+        </paragraph>
+        
+        <paragraph id="p5c8n9" mode="narration">
+          <summary>The narrator realizes she would have been the next victim.</summary>
+          Had he not killed himself, it turns out that I would've been his next victim.
+        </paragraph>
+        
+        <paragraph id="p8d2o2" mode="narration">
+          <summary>The police investigation.</summary>
+          The police investigated my family to see if they had any connection to the killer, just to be certain. Of course, we'd never even seen him before. My parents tried to keep it a secret from me, but I found out when the police started questioning me directly.
+        </paragraph>
+        
+        <paragraph id="p3e5p5" mode="narration">
+          <summary>The narrator's reaction to the news.</summary>
+          I would be lying if I said it wasn't a shock. But more powerful than the shock was the unreal feeling that it gave me.
+        </paragraph>
+        
+        <paragraph id="p6f8q8" mode="narration">
+          <summary>The narrator's thoughts on her life being in someone else's hands.</summary>
+          My life had been in the hands of someone with no connection to me at all. I just couldn't wrap my head around the idea, which is exactly how I got interested in that sort of thing to begin with.
+        </paragraph>
+        
+        <paragraph id="p1g1r1" mode="narration">
+          <summary>The narrator never told her friends why.</summary>
+          I never told my friends why. I knew they would look at me differently if I did. "The psycho liked her," they would say, which is more than a good enough reason to put me on the bullied list. It was a bit too harsh of a truth to laugh off.
+        </paragraph>
+        
+        <paragraph id="p4h4s4" mode="narration">
+          <summary>The narrator's different status in the class.</summary>
+          But just being interested in that sort of thing was enough to make me different, and the class tends to treat me like Doctor Murder, but it's a far cry from being bullied.
+        </paragraph>
+      </beat>
+    </sequence>
+    
+    <sequence id="s7u2w5" loc="School hallway and roof" time="after lunch" pov="suema">
+      <summary>After lunch, a student claims to see Boogiepop on the roof, and the narrator investigates.</summary>
+      
+      <beat id="b2v8x8">
+        <summary>Walking to class after lunch.</summary>
+        
+        <paragraph id="p8i7t1" mode="narration">
+          <summary>The narrator describes going to class after lunch.</summary>
+          After lunch, we all went off to our fifth period classrooms.
+        </paragraph>
+        
+        <paragraph id="p3j0u4" mode="narration">
+          <summary>The narrator's thoughts on her Modern Japanese class.</summary>
+          Even though I was in the science program, my next class was Modern Japanese, a subject that automatically got on my nerves. Our school let you choose between science and humanities concentrations in your second year, but even so, we had to complete one course from the other program during our second year. An absurd requirement, if you ask me.
+        </paragraph>
+        
+        <paragraph id="p6k3v7" mode="narration">
+          <summary>The narrator walks with a friend.</summary>
+          A friend from another class who was also forced to take Japanese walked across the covered walkway with me. Usually, there were three of us, but Niitoki-san was at a meeting for the discipline committee today.
+        </paragraph>
+      </beat>
+      
+      <beat id="b9l1y0" mode="narration">
+        <summary>The announcement about Miyashita Touka.</summary>
+        
+        <paragraph id="p2m6w3" mode="narration">
+          <summary>The PA announcement about Miyashita Touka.</summary>
+          As we walked, the PA came and said, "…Miyashita Touka, second year, class C. Please, return to the infirmary at once. Miyashita Touka, second year, class C…"
+        </paragraph>
+        
+        <paragraph id="p7n9z6" mode="dialogue" char="friend">
+          <summary>The friend wonders where Touka went.</summary>
+          "Hunh, wonder where Touka went?" the girl next to me asked. She was in the same class.
+        </paragraph>
+        
+        <paragraph id="p4a2x9" mode="dialogue" char="suema">
+          <summary>Suema asks if Touka was in the infirmary.</summary>
+          "She was in the infirmary?"
+        </paragraph>
+        
+        <paragraph id="p9b5y2" mode="dialogue" char="friend">
+          <summary>The friend confirms Touka was sick.</summary>
+          "Yeah, she got sick at the start of fourth bell…"
+        </paragraph>
+        
+        <paragraph id="p5c8z5" mode="dialogue" char="suema">
+          <summary>Suema asks if Touka was faking it.</summary>
+          "Faking it?"
+        </paragraph>
+        
+        <paragraph id="p8d1a8" mode="dialogue" char="friend">
+          <summary>The friend suggests Touka might be dating.</summary>
+          "Mm… She is dating a senior…"
+        </paragraph>
+        
+        <paragraph id="p3e4b1" mode="dialogue" char="suema">
+          <summary>Suema suggests Touka might be skipping for a date.</summary>
+          "Skipping out for a date?"
+        </paragraph>
+        
+        <paragraph id="p6f7c4" mode="dialogue" char="friend">
+          <summary>The friend confirms and asks Suema not to tell Niitoki-san.</summary>
+          "Maybe. But dating is against the rules, so don't tell Niitoki-san," she said, putting her finger in front of her lips.
+        </paragraph>
+        
+        <paragraph id="p1g0d7" mode="dialogue" char="suema">
+          <summary>Suema promises not to tell.</summary>
+          I grimaced back at her. "I would never."
+        </paragraph>
+        
+        <paragraph id="p4h3e0" mode="dialogue" char="friend">
+          <summary>The friend speculates where Touka might be.</summary>
+          "They're probably on the roof or something now…" she said, glancing out the window. Suddenly, she let out a piercing shriek.
+        </paragraph>
+        
+        <paragraph id="p9i6f3" mode="dialogue" char="suema">
+          <summary>Suema asks what's wrong.</summary>
+          Startled, I asked, "Wh-what?"
+        </paragraph>
+        
+        <paragraph id="p5j9g6" mode="dialogue" char="friend">
+          <summary>The friend points at something outside.</summary>
+          "Th-th-th-there!" She pointed out the window, her finger trembling.
+        </paragraph>
+        
+        <paragraph id="p8k2h9" mode="dialogue" char="suema">
+          <summary>Suema asks what she's pointing at.</summary>
+          "What?"
+        </paragraph>
+        
+        <paragraph id="p2l5i2" mode="dialogue" char="friend">
+          <summary>The friend claims to see Boogiepop.</summary>
+          "Boogiepop! On the roof!"
+        </paragraph>
+        
+        <paragraph id="p7m8j5" mode="dialogue" char="suema">
+          <summary>Suema expresses disbelief.</summary>
+          "Eh?" I stuck my head out the window.
+        </paragraph>
+        
+        <paragraph id="p4n1k8" mode="narration">
+          <summary>Suema sees nothing on the roof.</summary>
+          But there was nothing.
+        </paragraph>
+        
+        <paragraph id="p9o4l1" mode="dialogue" char="suema">
+          <summary>Suema tells her friend there's nothing there.</summary>
+          "Nothing there."
+        </paragraph>
+        
+        <paragraph id="p5q7m4" mode="dialogue" char="friend">
+          <summary>The friend insists she saw something.</summary>
+          "There was! I saw it! It moved away!"
+        </paragraph>
+        
+        <paragraph id="p8r0n7" mode="dialogue" char="suema">
+          <summary>Suema asks if it might have been someone else.</summary>
+          "You sure it wasn't somebody else? Miyashita-san?"
+        </paragraph>
+        
+        <paragraph id="p3s3o0" mode="dialogue" char="friend">
+          <summary>The friend describes what she saw.</summary>
+          "I don't think so! It had a black hat on! Like a pipe!" she said, still in a panic.
+        </paragraph>
+        
+        <paragraph id="p6t6p3" mode="internal" char="suema">
+          <summary>Suema decides to pretend to believe her friend.</summary>
+          Clearly, she was seeing things, but nobody believes that when it happens to them. Reverse psychology was more effective. If I pretended to believe her, she would start listening to me.
+        </paragraph>
+        
+        <paragraph id="p1u9q6" mode="dialogue" char="suema">
+          <summary>Suema offers to check the roof.</summary>
+          "Okay. Let's go see," I said, and she spun to stare at me in horror.
+        </paragraph>
+        
+        <paragraph id="p4v2r9" mode="dialogue" char="friend">
+          <summary>The friend is shocked by Suema's suggestion.</summary>
+          "Hunh?"
+        </paragraph>
+        
+        <paragraph id="p9w5s2" mode="dialogue" char="suema">
+          <summary>Suema explains why she wants to see Boogiepop.</summary>
+          "If Boogiepop is real, then I want to see him."
+        </paragraph>
+        
+        <paragraph id="p5x8t5" mode="dialogue" char="friend">
+          <summary>The friend warns Suema not to go.</summary>
+          "No! Don't! It's dangerous!"
+        </paragraph>
+        
+        <paragraph id="p8y1u8" mode="dialogue" char="suema">
+          <summary>Suema reassures her friend and tells her to go to class.</summary>
+          "Don't worry. Go ahead, I'll meet you in class."
+        </paragraph>
+      </beat>
+      
+      <beat id="b2z4v0" mode="narration">
+        <summary>Checking the roof.</summary>
+        
+        <paragraph id="p3a7w3" mode="narration">
+          <summary>Suema heads for the roof.</summary>
+          I headed for the roof. I ran up almost all of the stairs, and I was pretty out of breath by the time that I reached the door.
+        </paragraph>
+        
+        <paragraph id="p6b0x6" mode="narration">
+          <summary>The roof door is locked.</summary>
+          But the door to the roof was locked. Oh, right; they had belatedly sealed it off after someone had thrown themself off.
+        </paragraph>
+        
+        <paragraph id="p1c3y9" mode="narration">
+          <summary>Suema looks out the window at the roof.</summary>
+          I peered out the window. I could see most of the roof, but there was nobody there.
+        </paragraph>
+        
+        <paragraph id="p4d6z2" mode="narration">
+          <summary>Suema's friend is waiting for her.</summary>
+          When I got down the stairs, she was waiting for me, looking worried.
+        </paragraph>
+        
+        <paragraph id="p9e9a5" mode="dialogue" char="friend">
+          <summary>The friend asks what happened.</summary>
+          "Wha-what happened?"
+        </paragraph>
+        
+        <paragraph id="p5f2b8" mode="dialogue" char="suema">
+          <summary>Suema tells her friend there was nothing there.</summary>
+          "Nothing there."
+        </paragraph>
+        
+        <paragraph id="p8g5c1" mode="dialogue" char="friend">
+          <summary>The friend asks for confirmation.</summary>
+          "Really?"
+        </paragraph>
+        
+        <paragraph id="p2h8d4" mode="dialogue" char="suema">
+          <summary>Suema confirms she looked everywhere.</summary>
+          "Yep. I looked everywhere."
+        </paragraph>
+        
+        <paragraph id="p7i1e7" mode="dialogue" char="friend">
+          <summary>The friend concludes she must have imagined it.</summary>
+          "Hunh. I guess I must have imagined it…" she said, relieved.
+        </paragraph>
+        
+        <paragraph id="p4j4f0" mode="dialogue" char="suema">
+          <summary>Suema agrees but feels disappointed.</summary>
+          "I guess," I replied, surprised to find myself disappointed. As we headed to class, it occurred to me that there was a fire escape at the back of the roof, and if someone had gone down that, I wouldn't have been able to see them. But it was too late to go check now.
+        </paragraph>
+        
+        <paragraph id="p9k7g3" mode="narration">
+          <summary>Life returns to normal.</summary>
+          Nothing like that happened again, and our peaceful, safe lives dragged on.
+        </paragraph>
+      </beat>
+    </sequence>
+  </chapter>
+</book>

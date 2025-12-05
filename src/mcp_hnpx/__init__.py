@@ -1,2 +1,8 @@
-def hello() -> str:
-    return "Hello from mcp-hnpx!"
+"""
+MCP Server for HNPX document manipulation.
+"""
+
+from .server import main
+
+__version__ = "0.1.0"
+__all__ = ["main"]
