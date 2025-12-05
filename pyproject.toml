@@ -9,7 +9,6 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "lxml>=5.0.0",
-    "xmlschema>=3.0.0",
     "fastmcp>=2.13.3",
 ]
 
@@ -24,4 +23,4 @@ dev = [
 ]
 
 [project.scripts]
-mcp-hnpx = "mcp_hnpx.server:mcp.run"
+mcp-hnpx = "mcp_hnpx:app.run"
