@@ -11,8 +11,6 @@ from ..hnpx_utils import (
     generate_random_id,
     get_all_ids,
     validate_narrative_mode,
-    create_backup_file,
-    cleanup_backup_file,
 )
 from ..errors import (
     NotHNPXError,
@@ -131,10 +129,6 @@ def create_chapter(
     chapter_id = generate_random_id(existing_ids)
     logger.debug("Generated chapter ID: %s", chapter_id)
 
-    # Create backup
-    backup_path = create_backup_file(file_path)
-    logger.debug("Created backup file: %s", backup_path)
-
     try:
         # Create chapter element
         chapter_attrib = {"id": chapter_id, "title": title}
@@ -160,9 +154,6 @@ def create_chapter(
             f.write(xml_str)
         logger.info("Successfully saved document with new chapter: %s", file_path)
 
-        # Clean up backup
-        cleanup_backup_file(backup_path)
-
         result = {
             "success": True,
             "chapter_id": chapter_id,
@@ -175,18 +166,6 @@ def create_chapter(
         return result
     except Exception as e:
         logger.error("Failed to create chapter: %s", str(e))
-        # Restore from backup if available
-        if backup_path:
-            import os
-
-            if os.path.exists(backup_path):
-                logger.debug("Restoring from backup: %s", backup_path)
-                with open(backup_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(content)
-                os.remove(backup_path)
-                logger.debug("Successfully restored from backup")
         raise e
 
 
@@ -256,10 +235,6 @@ def create_sequence(
     sequence_id = generate_random_id(existing_ids)
     logger.debug("Generated sequence ID: %s", sequence_id)
 
-    # Create backup
-    backup_path = create_backup_file(file_path)
-    logger.debug("Created backup file: %s", backup_path)
-
     try:
         # Create sequence element
         sequence_attrib = {"id": sequence_id, "loc": location}
@@ -288,9 +263,6 @@ def create_sequence(
             f.write(xml_str)
         logger.info("Successfully saved document with new sequence: %s", file_path)
 
-        # Clean up backup
-        cleanup_backup_file(backup_path)
-
         result = {
             "success": True,
             "sequence_id": sequence_id,
@@ -304,18 +276,6 @@ def create_sequence(
         return result
     except Exception as e:
         logger.error("Failed to create sequence: %s", str(e))
-        # Restore from backup if available
-        if backup_path:
-            import os
-
-            if os.path.exists(backup_path):
-                logger.debug("Restoring from backup: %s", backup_path)
-                with open(backup_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(content)
-                os.remove(backup_path)
-                logger.debug("Successfully restored from backup")
         raise e
 
 
@@ -363,10 +323,6 @@ def create_beat(file_path: str, parent_id: str, summary: str) -> dict:
     beat_id = generate_random_id(existing_ids)
     logger.debug("Generated beat ID: %s", beat_id)
 
-    # Create backup
-    backup_path = create_backup_file(file_path)
-    logger.debug("Created backup file: %s", backup_path)
-
     try:
         # Create beat element
         beat = etree.SubElement(parent, "beat", id=beat_id)
@@ -387,9 +343,6 @@ def create_beat(file_path: str, parent_id: str, summary: str) -> dict:
             f.write(xml_str)
         logger.info("Successfully saved document with new beat: %s", file_path)
 
-        # Clean up backup
-        cleanup_backup_file(backup_path)
-
         result = {
             "success": True,
             "beat_id": beat_id,
@@ -400,18 +353,6 @@ def create_beat(file_path: str, parent_id: str, summary: str) -> dict:
         return result
     except Exception as e:
         logger.error("Failed to create beat: %s", str(e))
-        # Restore from backup if available
-        if backup_path:
-            import os
-
-            if os.path.exists(backup_path):
-                logger.debug("Restoring from backup: %s", backup_path)
-                with open(backup_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(content)
-                os.remove(backup_path)
-                logger.debug("Successfully restored from backup")
         raise e
 
 
@@ -485,10 +426,6 @@ def create_paragraph(
     paragraph_id = generate_random_id(existing_ids)
     logger.debug("Generated paragraph ID: %s", paragraph_id)
 
-    # Create backup
-    backup_path = create_backup_file(file_path)
-    logger.debug("Created backup file: %s", backup_path)
-
     try:
         # Create paragraph element
         paragraph_attrib = {"id": paragraph_id}
@@ -521,9 +458,6 @@ def create_paragraph(
             f.write(xml_str)
         logger.info("Successfully saved document with new paragraph: %s", file_path)
 
-        # Clean up backup
-        cleanup_backup_file(backup_path)
-
         result = {
             "success": True,
             "paragraph_id": paragraph_id,
@@ -537,16 +471,4 @@ def create_paragraph(
         return result
     except Exception as e:
         logger.error("Failed to create paragraph: %s", str(e))
-        # Restore from backup if available
-        if backup_path:
-            import os
-
-            if os.path.exists(backup_path):
-                logger.debug("Restoring from backup: %s", backup_path)
-                with open(backup_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(content)
-                os.remove(backup_path)
-                logger.debug("Successfully restored from backup")
         raise e

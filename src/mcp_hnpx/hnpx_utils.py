@@ -6,7 +6,6 @@ import logging
 import os
 import random
 import string
-import time
 from typing import Optional
 
 from lxml import etree
@@ -157,33 +156,6 @@ def get_element_type(element: etree.Element) -> str:
     element_type = element.tag
     logger.debug("Element type: %s", element_type)
     return element_type
-
-
-def create_backup_file(file_path: str) -> str:
-    """Create a backup of the file before destructive operations."""
-    backup_path = f"{file_path}.backup.{int(time.time())}"
-    logger.debug("Creating backup file: %s", backup_path)
-
-    try:
-        with open(file_path, "r", encoding="utf-8") as src:
-            content = src.read()
-        with open(backup_path, "w", encoding="utf-8") as dst:
-            dst.write(content)
-        logger.debug("Successfully created backup file: %s", backup_path)
-        return backup_path
-    except Exception as e:
-        logger.error("Failed to create backup file %s: %s", backup_path, str(e))
-        return None
-
-
-def cleanup_backup_file(backup_path: str):
-    """Remove backup file after successful operation."""
-    if backup_path and os.path.exists(backup_path):
-        try:
-            os.remove(backup_path)
-            logger.debug("Successfully removed backup file: %s", backup_path)
-        except Exception as e:
-            logger.warning("Failed to remove backup file %s: %s", backup_path, str(e))
 
 
 def validate_narrative_mode(mode: str, char: Optional[str]) -> None:

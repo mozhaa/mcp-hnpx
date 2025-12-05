@@ -453,7 +453,6 @@ Each tool must validate:
 
 ### 7.3 File Operations
 - All file operations should be atomic
-- Create backup before destructive operations (remove, reorder)
 - Use file locking to prevent concurrent modifications
 - Validate file permissions before operations
 
@@ -534,7 +533,6 @@ Returns: Full text of written content
 
 ### 10.3 Data Integrity
 - Verify XML well-formedness before processing
-- Create automatic backups
 - Implement checksum verification
 
 ---

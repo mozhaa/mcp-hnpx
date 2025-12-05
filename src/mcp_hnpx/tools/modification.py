@@ -9,8 +9,6 @@ from ..hnpx_utils import (
     parse_xml_file,
     is_valid_hnpx_document,
     find_node_by_id,
-    create_backup_file,
-    cleanup_backup_file,
     validate_narrative_mode,
 )
 from ..errors import (
@@ -81,10 +79,6 @@ def edit_node_attributes(
             )
             raise ValidationFailedError("Dialogue paragraphs must have char attribute")
 
-    # Create backup
-    backup_path = create_backup_file(file_path)
-    logger.debug("Created backup file: %s", backup_path)
-
     try:
         # Update attributes
         updated_attrs = {}
@@ -112,9 +106,6 @@ def edit_node_attributes(
             "Successfully saved document with updated attributes: %s", file_path
         )
 
-        # Clean up backup
-        cleanup_backup_file(backup_path)
-
         result = {
             "success": True,
             "node_id": node_id,
@@ -126,18 +117,6 @@ def edit_node_attributes(
         return result
     except Exception as e:
         logger.error("Failed to edit attributes: %s", str(e))
-        # Restore from backup if available
-        if backup_path:
-            import os
-
-            if os.path.exists(backup_path):
-                logger.debug("Restoring from backup: %s", backup_path)
-                with open(backup_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(content)
-                os.remove(backup_path)
-                logger.debug("Successfully restored from backup")
         raise e
 
 
@@ -173,10 +152,6 @@ def remove_node(file_path: str, node_id: str) -> dict:
         logger.error("Attempt to remove immutable root book element: %s", node_id)
         raise ImmutableRootError()
 
-    # Create backup
-    backup_path = create_backup_file(file_path)
-    logger.debug("Created backup file: %s", backup_path)
-
     try:
         parent = node.getparent()
         logger.debug("Found parent node: %s", parent.tag if parent else "None")
@@ -203,9 +178,6 @@ def remove_node(file_path: str, node_id: str) -> dict:
             f.write(xml_str)
         logger.info("Successfully saved document after node removal: %s", file_path)
 
-        # Clean up backup
-        cleanup_backup_file(backup_path)
-
         removed_info["success"] = True
         removed_info["message"] = (
             f"Removed {node.tag} {node_id} and all its descendants"
@@ -214,18 +186,6 @@ def remove_node(file_path: str, node_id: str) -> dict:
         return removed_info
     except Exception as e:
         logger.error("Failed to remove node: %s", str(e))
-        # Restore from backup if available
-        if backup_path:
-            import os
-
-            if os.path.exists(backup_path):
-                logger.debug("Restoring from backup: %s", backup_path)
-                with open(backup_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(content)
-                os.remove(backup_path)
-                logger.debug("Successfully restored from backup")
         raise e
 
 
@@ -293,10 +253,6 @@ def reorder_children(file_path: str, parent_id: str, child_ids: list[str]) -> di
         )
         raise ValidationFailedError("Must include all children in reorder list")
 
-    # Create backup
-    backup_path = create_backup_file(file_path)
-    logger.debug("Created backup file: %s", backup_path)
-
     try:
         # Remove all children (except summary)
         for child in list(parent):
@@ -336,9 +292,6 @@ def reorder_children(file_path: str, parent_id: str, child_ids: list[str]) -> di
             "Successfully saved document after reordering children: %s", file_path
         )
 
-        # Clean up backup
-        cleanup_backup_file(backup_path)
-
         result = {
             "success": True,
             "parent_id": parent_id,
@@ -350,16 +303,4 @@ def reorder_children(file_path: str, parent_id: str, child_ids: list[str]) -> di
         return result
     except Exception as e:
         logger.error("Failed to reorder children: %s", str(e))
-        # Restore from backup if available
-        if backup_path:
-            import os
-
-            if os.path.exists(backup_path):
-                logger.debug("Restoring from backup: %s", backup_path)
-                with open(backup_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(content)
-                os.remove(backup_path)
-                logger.debug("Successfully restored from backup")
         raise e
