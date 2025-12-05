@@ -27,7 +27,7 @@
 
 ## Quick Examples
 
-```json
+```
 // Create new document
 create_document({"file_path": "new_story.xml", "title": "My Novel"})
 
