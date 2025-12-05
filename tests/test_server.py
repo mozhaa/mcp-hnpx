@@ -365,3 +365,88 @@ def test_mcp_server_with_incomplete_document():
 
     parsed_search = json.loads(search_result)
     assert isinstance(parsed_search, list)
+
+
+def test_mcp_server_create_document():
+    """Test MCP server create_document functionality."""
+    from mcp_hnpx.server import create_document
+    import tempfile
+    import os
+    
+    # Create a temporary file path for the new document
+    with tempfile.TemporaryDirectory() as temp_dir:
+        test_file = os.path.join(temp_dir, "test_new_document.xml")
+        
+        # Test creating a new document with default title
+        result = create_document.fn(test_file)
+        assert result is not None
+        assert isinstance(result, str)
+        assert "Successfully created" in result
+        assert "test_new_document.xml" in result
+        assert "Untitled Book" in result
+        
+        # Verify the file was created
+        assert os.path.exists(test_file)
+        
+        # Load and verify the document structure
+        doc = HNPXDocument(test_file)
+        assert doc.root.tag == "book"
+        assert doc.get_element_summary(doc.root) == "Book: Untitled Book"
+        
+        # Check for the expected hierarchy
+        chapters = doc.root.xpath("chapter")
+        assert len(chapters) == 1
+        chapter = chapters[0]
+        assert chapter.get("title") == "Chapter 1"
+        assert doc.get_element_summary(chapter) == "Chapter 1"
+        
+        sequences = chapter.xpath("sequence")
+        assert len(sequences) == 1
+        sequence = sequences[0]
+        assert sequence.get("loc") == "Unknown"
+        assert doc.get_element_summary(sequence) == "Opening scene"
+        
+        beats = sequence.xpath("beat")
+        assert len(beats) == 1
+        beat = beats[0]
+        assert doc.get_element_summary(beat) == "Opening beat"
+        
+        paragraphs = beat.xpath("paragraph")
+        assert len(paragraphs) == 1
+        paragraph = paragraphs[0]
+        assert paragraph.get("mode") == "narration"
+        assert doc.get_element_summary(paragraph) == "Opening paragraph"
+        assert doc.get_element_text(paragraph) == "Begin your story here..."
+        
+        # Test creating a document with a custom title
+        test_file2 = os.path.join(temp_dir, "test_custom_title.xml")
+        result2 = create_document.fn(test_file2, "My Custom Story")
+        assert "My Custom Story" in result2
+        
+        # Verify the custom title was used
+        doc2 = HNPXDocument(test_file2)
+        assert doc2.get_element_summary(doc2.root) == "Book: My Custom Story"
+
+
+def test_mcp_server_create_document_nested_directory():
+    """Test creating a document in a nested directory."""
+    from mcp_hnpx.server import create_document
+    import tempfile
+    import os
+    
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Create a nested path that doesn't exist
+        nested_dir = os.path.join(temp_dir, "nested", "path")
+        test_file = os.path.join(nested_dir, "test_nested.xml")
+        
+        # The function should create the directory structure
+        result = create_document.fn(test_file, "Nested Test")
+        assert "Successfully created" in result
+        
+        # Verify the file was created in the nested directory
+        assert os.path.exists(test_file)
+        
+        # Verify the document structure
+        doc = HNPXDocument(test_file)
+        assert doc.root.tag == "book"
+        assert doc.get_element_summary(doc.root) == "Book: Nested Test"

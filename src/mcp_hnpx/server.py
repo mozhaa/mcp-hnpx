@@ -9,7 +9,7 @@ from typing import Dict
 from lxml import etree
 from fastmcp import FastMCP
 
-from .hnpx import HNPXDocument, generate_id
+from .hnpx import HNPXDocument, generate_id, create_element
 
 # Initialize FastMCP server
 mcp = FastMCP("hnpx-server")
@@ -396,6 +396,57 @@ def save_document(file_path: str, output_path: str = None) -> str:
         return f"Successfully saved document to '{output_path}'"
     else:
         return f"Failed to save document to '{output_path}'"
+
+
+@mcp.tool()
+def create_document(file_path: str, title: str = "Untitled Book") -> str:
+    """Create a new empty HNPX document with basic structure."""
+    try:
+        # Create the basic HNPX document structure
+        book = create_element("book", f"Book: {title}")
+        
+        # Create a single chapter with a placeholder title
+        chapter = create_element("chapter", "Chapter 1", title="Chapter 1")
+        
+        # Create a single sequence with a placeholder location
+        sequence = create_element("sequence", "Opening scene", loc="Unknown")
+        
+        # Create a single beat with a placeholder summary
+        beat = create_element("beat", "Opening beat")
+        
+        # Create a single paragraph with placeholder content
+        paragraph = create_element("paragraph", "Opening paragraph", mode="narration")
+        paragraph.text = "Begin your story here..."
+        
+        # Build the document hierarchy
+        beat.append(paragraph)
+        sequence.append(beat)
+        chapter.append(sequence)
+        book.append(chapter)
+        
+        # Create the XML tree
+        tree = etree.ElementTree(book)
+        
+        # Ensure the directory exists
+        output_path = Path(file_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Save the document
+        tree.write(
+            str(output_path),
+            encoding="utf-8",
+            xml_declaration=True,
+            pretty_print=True
+        )
+        
+        # Add to document cache
+        abs_path = str(output_path.resolve())
+        documents[abs_path] = HNPXDocument(abs_path)
+        
+        return f"Successfully created new HNPX document at '{file_path}' with title '{title}'"
+        
+    except Exception as e:
+        return f"Failed to create HNPX document: {str(e)}"
 
 
 if __name__ == "__main__":
