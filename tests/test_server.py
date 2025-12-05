@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from mcp_hnpx.hnpx_utils import HNPXDocument, create_element, generate_id
@@ -6,7 +8,7 @@ from mcp_hnpx.hnpx_utils import HNPXDocument, create_element, generate_id
 def test_hnpx_document_loading():
     """Test loading the example document."""
     doc = HNPXDocument("example.xml")
-    assert doc.file_path == "example.xml"
+    assert doc.file_path == Path("example.xml")
     assert doc.root.tag is not None
 
 
@@ -26,7 +28,7 @@ def test_hnpx_element_context():
     """Test getting element context (parent and siblings)."""
     doc = HNPXDocument("example.xml")
     node = doc.get_element_by_id("p9m5k2")
-    if node:
+    if node is not None:
         parent = doc.get_parent(node)
         assert parent is not None
         assert parent.tag is not None
@@ -35,8 +37,12 @@ def test_hnpx_element_context():
         assert isinstance(siblings, list)
         for sibling in siblings[:3]:
             assert sibling.tag is not None
-            assert sibling.get("id") is not None
-            assert isinstance(doc.get_element_summary(sibling), str)
+            # Only check for ID on elements that should have them (not summary elements)
+            if sibling.tag != "summary":
+                assert sibling.get("id") is not None
+            # Summary elements don't have their own summary, so skip the check for them
+            if sibling.tag != "summary":
+                assert isinstance(doc.get_element_summary(sibling), str)
 
 
 def test_hnpx_empty_containers():
@@ -57,8 +63,12 @@ def test_hnpx_search():
     assert isinstance(results, list)
     for result in results[:3]:
         assert result.tag is not None
-        assert result.get("id") is not None
-        assert isinstance(doc.get_element_summary(result), str)
+        # Only check for ID on elements that should have them (not summary elements)
+        if result.tag != "summary":
+            assert result.get("id") is not None
+        # Summary elements don't have their own summary, so skip the check for them
+        if result.tag != "summary":
+            assert isinstance(doc.get_element_summary(result), str)
 
 
 def test_hnpx_validation():
@@ -110,7 +120,8 @@ def test_element_creation():
     beat.append(para)
     assert beat.tag == "beat"
     assert beat.get("id") == "a1b2c3"
-    assert len(list(beat)) == 1
+    # Beat should have 2 children: summary and paragraph
+    assert len(list(beat)) == 2
 
 
 @pytest.mark.asyncio
