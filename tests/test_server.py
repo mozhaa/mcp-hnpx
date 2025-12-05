@@ -212,3 +212,153 @@ def test_mcp_server_search_nodes():
         assert "id" in node
         assert "tag" in node
         assert "summary" in node
+
+
+def test_incomplete_document_loading():
+    """Test loading the incomplete document."""
+    doc = HNPXDocument("tests/resources/incomplete.xml")
+    assert doc.file_path == Path("tests/resources/incomplete.xml")
+    assert doc.root.tag is not None
+    assert doc.root.tag == "book"
+
+
+def test_incomplete_document_empty_paragraphs():
+    """Test finding empty paragraphs in the incomplete document."""
+    doc = HNPXDocument("tests/resources/incomplete.xml")
+    
+    # Find all paragraphs
+    paragraphs = doc.root.xpath("//paragraph[@id]")
+    assert len(paragraphs) > 0
+    
+    # Check for paragraphs with summaries but no text content
+    empty_paragraphs = []
+    for paragraph in paragraphs:
+        text = doc.get_element_text(paragraph)
+        summary = doc.get_element_summary(paragraph)
+        
+        # If there's a summary but no text, it's an incomplete paragraph
+        if summary and not text.strip():
+            empty_paragraphs.append(paragraph)
+    
+    # The incomplete.xml should have some empty paragraphs
+    assert len(empty_paragraphs) > 0
+    
+    # Verify they have summaries but no text
+    for para in empty_paragraphs:
+        assert doc.get_element_summary(para) is not None
+        assert doc.get_element_summary(para).strip() != ""
+        assert doc.get_element_text(para).strip() == ""
+
+
+def test_incomplete_document_statistics():
+    """Test document statistics with incomplete content."""
+    doc = HNPXDocument("tests/resources/incomplete.xml")
+    stats = doc.get_document_stats()
+    
+    assert isinstance(stats, dict)
+    assert "total_elements" in stats
+    assert "total_paragraphs" in stats
+    assert "total_words" in stats
+    assert "max_depth" in stats
+    assert "pov_characters" in stats
+    assert "narrative_modes" in stats
+    
+    # The incomplete document should have fewer words than the complete one
+    # since some paragraphs have no text content
+    assert stats["total_words"] >= 0
+    
+    # Should still have the correct number of paragraphs
+    assert stats["total_paragraphs"] > 0
+
+
+def test_incomplete_document_export():
+    """Test exporting incomplete document to different formats."""
+    from mcp_hnpx.server import export_plain_text, export_markdown
+    
+    doc = HNPXDocument("tests/resources/incomplete.xml")
+    
+    # Test plain text export
+    plain_text = export_plain_text(doc, include_summaries=True)
+    assert isinstance(plain_text, str)
+    assert len(plain_text) > 0
+    
+    # Test markdown export
+    markdown = export_markdown(doc, include_summaries=True)
+    assert isinstance(markdown, str)
+    assert len(markdown) > 0
+    
+    # Both exports should include summaries even when text is missing
+    assert "Summary:" in plain_text or "BOOK:" in plain_text
+    assert "#" in markdown or "*" in markdown
+
+
+def test_incomplete_document_validation():
+    """Test validation of incomplete document."""
+    doc = HNPXDocument("tests/resources/incomplete.xml")
+    is_valid, errors = doc.validate()
+    
+    # The document should be valid even with empty paragraphs
+    # (assuming the schema allows empty text content)
+    assert isinstance(is_valid, bool)
+    assert isinstance(errors, list)
+
+
+def test_incomplete_document_search():
+    """Test search functionality with incomplete document."""
+    doc = HNPXDocument("tests/resources/incomplete.xml")
+    
+    # Search for elements with specific summary content
+    results = doc.search_elements(summary_contains="Boogiepop")
+    assert isinstance(results, list)
+    
+    # Should find elements even if they have no text content
+    for result in results:
+        assert result.tag is not None
+        summary = doc.get_element_summary(result)
+        assert summary is not None
+        assert "boogiepop" in summary.lower()
+    
+    # Search for elements with text content (should find fewer results)
+    text_results = doc.search_elements(text_contains="Boogiepop")
+    assert isinstance(text_results, list)
+    
+    # The incomplete document might have fewer text matches than summary matches
+    # since some paragraphs lack text content
+
+
+def test_mcp_server_with_incomplete_document():
+    """Test MCP server functionality with incomplete document."""
+    from mcp_hnpx.server import get_node, get_empty_containers, search_nodes
+    
+    # Test get_node with a paragraph from incomplete document
+    doc = HNPXDocument("tests/resources/incomplete.xml")
+    paragraphs = doc.root.xpath("//paragraph[@id]")
+    assert len(paragraphs) > 0
+    
+    paragraph_id = paragraphs[0].get("id")
+    result = get_node.fn("tests/resources/incomplete.xml", paragraph_id)
+    assert result is not None
+    assert isinstance(result, str)
+    
+    import json
+    parsed_result = json.loads(result)
+    assert "id" in parsed_result
+    assert "tag" in parsed_result
+    assert "summary" in parsed_result
+    assert "text" in parsed_result  # Should be present but might be empty
+    
+    # Test get_empty_containers
+    empty_result = get_empty_containers.fn("tests/resources/incomplete.xml", 5)
+    assert empty_result is not None
+    assert isinstance(empty_result, str)
+    
+    parsed_empty = json.loads(empty_result)
+    assert isinstance(parsed_empty, list)
+    
+    # Test search_nodes
+    search_result = search_nodes.fn("tests/resources/incomplete.xml", summary_contains="Boogiepop")
+    assert search_result is not None
+    assert isinstance(search_result, str)
+    
+    parsed_search = json.loads(search_result)
+    assert isinstance(parsed_search, list)

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<book id="b3k9m7">
+  <summary>A story about high school students and the mysterious Boogiepop legend.</summary>
+  
+  <chapter id="c8p2q5" title="Boogiepop" pov="suema">
+    <summary>Students discuss the Boogiepop legend, and one claims to see the mysterious figure on the school roof.</summary>
+    
+    <sequence id="s4r7t9" loc="School cafeteria" time="lunch" pov="suema">
+      <summary>Lunch conversation about the Boogiepop legend and rumors about Kirima Nagi.</summary>
+      
+      <beat id="b1v6x3">
+        <summary>Introduction to the Boogiepop rumor.</summary>
+        
+        <paragraph id="p9m5k2" mode="narration">
+          <summary>The narrator introduces the Boogiepop rumor spreading among students.</summary>
+          Recently, a strange rumor, or rather, a bit of a ghost story, has been spreading among the girls of the second year classes.
+        </paragraph>
+        
+        <paragraph id="p2n8j4" mode="narration">
+          <summary>Description of Boogiepop's appearance and purpose.</summary>
+          It's something about the mysterious Boogiepop. Boogiepop is short, wears a black cape, and has a tall hat that's sort of like the one Maetel wore in Galaxy Express 999, only narrower. He's an assassin, and he can kill people instantly, without pain. He always does so when you are at your most beautiful, before you start to wither away, before you grow old and ugly.
+        </paragraph>
+      </beat>
+      
+      <beat id="b6u9y4">
+        <summary>Conversation about The Village of Eight Graves.</summary>
+        
+        <paragraph id="p3h7s1" mode="dialogue" char="kyoko">
+          <summary>Kyoko asks about The Village of Eight Graves.</summary>
+        </paragraph>
+        
+        <paragraph id="p8k4d6" mode="dialogue" char="suema">
+          <summary>Suema answers immediately.</summary>
+        </paragraph>
+        
+        <paragraph id="p1l5e9" mode="dialogue" char="kyoko">
+          <summary>Kyoko confirms the answer fits.</summary>
+        </paragraph>
+      </beat>
+      
+      <beat id="b9v4f8">
+        <summary>Discussion about Kirima Nagi.</summary>
+        
+        <paragraph id="p2x1g5" mode="dialogue" char="kyoko">
+          <summary>Kyoko asks about who might be a killer in their class.</summary>
+        </paragraph>
+        
+        <paragraph id="p7y3h6" mode="dialogue" char="suema">
+          <summary>Suema's general response.</summary>
+        </paragraph>
+      </beat>
+    </sequence>
+  </chapter>
+</book>
