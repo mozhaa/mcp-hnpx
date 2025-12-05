@@ -127,41 +127,55 @@ def test_element_creation():
     assert len(doc.get_children(beat)) == 1
 
 
-@pytest.mark.asyncio
-async def test_mcp_server_get_node():
+def test_mcp_server_get_node():
     """Test MCP server get_node functionality."""
-    from mcp_hnpx.server import HNPXMCPServer
+    from mcp_hnpx.server import get_node
 
-    server = HNPXMCPServer()
-    result = await server._get_node({"file_path": "example.xml", "node_id": "b3k9m7"})
+    # Access the underlying function from the FastMCP tool
+    result = get_node.fn("example.xml", "b3k9m7")
     assert result is not None
-    assert len(result.content) > 0
-    assert isinstance(result.content[0].text, str)
+    assert isinstance(result, str)
+    # Should be valid JSON
+    import json
+    parsed_result = json.loads(result)
+    assert "id" in parsed_result
+    assert "tag" in parsed_result
+    assert "attributes" in parsed_result
+    assert "summary" in parsed_result
 
 
-@pytest.mark.asyncio
-async def test_mcp_server_get_empty_containers():
+def test_mcp_server_get_empty_containers():
     """Test MCP server get_empty_containers functionality."""
-    from mcp_hnpx.server import HNPXMCPServer
+    from mcp_hnpx.server import get_empty_containers
 
-    server = HNPXMCPServer()
-    result = await server._get_empty_containers(
-        {"file_path": "example.xml", "limit": 3}
-    )
+    # Access the underlying function from the FastMCP tool
+    result = get_empty_containers.fn("example.xml", 3)
     assert result is not None
-    assert len(result.content) > 0
-    assert isinstance(result.content[0].text, str)
+    assert isinstance(result, str)
+    # Should be valid JSON
+    import json
+    parsed_result = json.loads(result)
+    assert isinstance(parsed_result, list)
+    assert len(parsed_result) <= 3
+    for container in parsed_result:
+        assert "id" in container
+        assert "tag" in container
+        assert "summary" in container
 
 
-@pytest.mark.asyncio
-async def test_mcp_server_search_nodes():
+def test_mcp_server_search_nodes():
     """Test MCP server search_nodes functionality."""
-    from mcp_hnpx.server import HNPXMCPServer
+    from mcp_hnpx.server import search_nodes
 
-    server = HNPXMCPServer()
-    result = await server._search_nodes(
-        {"file_path": "example.xml", "text_contains": "Boogiepop"}
-    )
+    # Access the underlying function from the FastMCP tool
+    result = search_nodes.fn("example.xml", text_contains="Boogiepop")
     assert result is not None
-    assert len(result.content) > 0
-    assert isinstance(result.content[0].text, str)
+    assert isinstance(result, str)
+    # Should be valid JSON
+    import json
+    parsed_result = json.loads(result)
+    assert isinstance(parsed_result, list)
+    for node in parsed_result:
+        assert "id" in node
+        assert "tag" in node
+        assert "summary" in node
