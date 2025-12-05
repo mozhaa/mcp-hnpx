@@ -2,836 +2,387 @@
 MCP Server for HNPX document manipulation.
 """
 
-import asyncio
 import json
 from pathlib import Path
 from typing import Any, Dict
 
 from lxml import etree
-from mcp.server import Server
-from mcp.server.models import InitializationOptions
-from mcp.server.stdio import stdio_server
-from mcp.types import (
-    CallToolResult,
-    ListToolsResult,
-    TextContent,
-    Tool,
-)
+from fastmcp import FastMCP
+from mcp.types import TextContent
 
 from .hnpx import HNPXDocument
 
+# Initialize FastMCP server
+mcp = FastMCP("hnpx-server")
 
-class HNPXMCPServer:
-    """MCP Server for HNPX document operations."""
+# Document cache
+documents: Dict[str, HNPXDocument] = {}
 
-    def __init__(self):
-        """Initialize the MCP server."""
-        self.server = Server("hnpx-server")
-        self.documents: Dict[str, HNPXDocument] = {}
-        self._setup_handlers()
 
-    def _setup_handlers(self):
-        """Set up MCP server handlers."""
+def get_document(file_path: str) -> HNPXDocument:
+    """Get or load a document."""
+    abs_path = str(Path(file_path).resolve())
+    if abs_path not in documents:
+        documents[abs_path] = HNPXDocument(abs_path)
+    return documents[abs_path]
 
-        @self.server.list_tools()
-        async def list_tools() -> ListToolsResult:
-            """List all available tools."""
-            tools = [
-                Tool(
-                    name="get_node",
-                    description="Get a node by ID and read its attributes and summary",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "Path to the HNPX file",
-                            },
-                            "node_id": {
-                                "type": "string",
-                                "description": "ID of the node to retrieve",
-                            },
-                        },
-                        "required": ["file_path", "node_id"],
-                    },
-                ),
-                Tool(
-                    name="get_node_context",
-                    description="Get context for a node (siblings, parent, parent's siblings)",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "Path to the HNPX file",
-                            },
-                            "node_id": {
-                                "type": "string",
-                                "description": "ID of the node to get context for",
-                            },
-                            "include_text": {
-                                "type": "boolean",
-                                "description": "Whether to include full text content",
-                                "default": False,
-                            },
-                        },
-                        "required": ["file_path", "node_id"],
-                    },
-                ),
-                Tool(
-                    name="set_node_children",
-                    description="Replace a node's entire children list",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "Path to the HNPX file",
-                            },
-                            "node_id": {
-                                "type": "string",
-                                "description": "ID of the node to modify",
-                            },
-                            "children_xml": {
-                                "type": "string",
-                                "description": "XML string representing the new children",
-                            },
-                        },
-                        "required": ["file_path", "node_id", "children_xml"],
-                    },
-                ),
-                Tool(
-                    name="append_node_children",
-                    description="Append children to a node's existing children list",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "Path to the HNPX file",
-                            },
-                            "node_id": {
-                                "type": "string",
-                                "description": "ID of the node to modify",
-                            },
-                            "children_xml": {
-                                "type": "string",
-                                "description": "XML string representing the children to append",
-                            },
-                        },
-                        "required": ["file_path", "node_id", "children_xml"],
-                    },
-                ),
-                Tool(
-                    name="remove_node",
-                    description="Remove a node by ID",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "Path to the HNPX file",
-                            },
-                            "node_id": {
-                                "type": "string",
-                                "description": "ID of the node to remove",
-                            },
-                        },
-                        "required": ["file_path", "node_id"],
-                    },
-                ),
-                Tool(
-                    name="edit_node_attributes",
-                    description="Edit node attributes",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "Path to the HNPX file",
-                            },
-                            "node_id": {
-                                "type": "string",
-                                "description": "ID of the node to edit",
-                            },
-                            "attributes": {
-                                "type": "object",
-                                "description": "Dictionary of attributes to set",
-                                "additionalProperties": {"type": "string"},
-                            },
-                        },
-                        "required": ["file_path", "node_id", "attributes"],
-                    },
-                ),
-                Tool(
-                    name="get_empty_containers",
-                    description="Get first N container tags that need children populated",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "Path to the HNPX file",
-                            },
-                            "limit": {
-                                "type": "integer",
-                                "description": "Maximum number of containers to return",
-                                "default": 10,
-                            },
-                        },
-                        "required": ["file_path"],
-                    },
-                ),
-                Tool(
-                    name="search_nodes",
-                    description="Search for nodes matching criteria",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "Path to the HNPX file",
-                            },
-                            "tag": {
-                                "type": "string",
-                                "description": "Element tag to search for (optional)",
-                            },
-                            "attributes": {
-                                "type": "object",
-                                "description": "Attributes to match (optional)",
-                                "additionalProperties": {"type": "string"},
-                            },
-                            "text_contains": {
-                                "type": "string",
-                                "description": "Text content to search for (optional)",
-                            },
-                            "summary_contains": {
-                                "type": "string",
-                                "description": "Summary content to search for (optional)",
-                            },
-                        },
-                        "required": ["file_path"],
-                    },
-                ),
-                Tool(
-                    name="validate_document",
-                    description="Validate HNPX document against schema",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "Path to the HNPX file",
-                            }
-                        },
-                        "required": ["file_path"],
-                    },
-                ),
-                Tool(
-                    name="get_document_stats",
-                    description="Get statistics about the HNPX document",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "Path to the HNPX file",
-                            }
-                        },
-                        "required": ["file_path"],
-                    },
-                ),
-                Tool(
-                    name="export_document",
-                    description="Export HNPX document to other formats",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "Path to the HNPX file",
-                            },
-                            "format": {
-                                "type": "string",
-                                "description": "Export format (plain, markdown)",
-                                "enum": ["plain", "markdown"],
-                            },
-                            "include_summaries": {
-                                "type": "boolean",
-                                "description": "Whether to include summaries in export",
-                                "default": True,
-                            },
-                        },
-                        "required": ["file_path", "format"],
-                    },
-                ),
-                Tool(
-                    name="save_document",
-                    description="Save changes to the HNPX document",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "Path to the HNPX file",
-                            },
-                            "output_path": {
-                                "type": "string",
-                                "description": "Output path (optional, defaults to input path)",
-                            },
-                        },
-                        "required": ["file_path"],
-                    },
-                ),
-            ]
-            return ListToolsResult(tools=tools)
+@mcp.tool()
+def get_node(file_path: str, node_id: str) -> str:
+    """Get a node by ID and read its attributes and summary."""
+    doc = get_document(file_path)
+    element = doc.get_element_by_id(node_id)
 
-        @self.server.call_tool()
-        async def call_tool(name: str, arguments: Dict[str, Any]) -> CallToolResult:
-            """Handle tool calls."""
-            try:
-                if name == "get_node":
-                    return await self._get_node(arguments)
-                elif name == "get_node_context":
-                    return await self._get_node_context(arguments)
-                elif name == "set_node_children":
-                    return await self._set_node_children(arguments)
-                elif name == "append_node_children":
-                    return await self._append_node_children(arguments)
-                elif name == "remove_node":
-                    return await self._remove_node(arguments)
-                elif name == "edit_node_attributes":
-                    return await self._edit_node_attributes(arguments)
-                elif name == "get_empty_containers":
-                    return await self._get_empty_containers(arguments)
-                elif name == "search_nodes":
-                    return await self._search_nodes(arguments)
-                elif name == "validate_document":
-                    return await self._validate_document(arguments)
-                elif name == "get_document_stats":
-                    return await self._get_document_stats(arguments)
-                elif name == "export_document":
-                    return await self._export_document(arguments)
-                elif name == "save_document":
-                    return await self._save_document(arguments)
-                else:
-                    return CallToolResult(
-                        content=[
-                            TextContent(type="text", text=f"Unknown tool: {name}")
-                        ],
-                        isError=True,
-                    )
-            except Exception as e:
-                return CallToolResult(
-                    content=[TextContent(type="text", text=f"Error: {str(e)}")],
-                    isError=True,
-                )
+    if element is None:
+        return f"Node with ID '{node_id}' not found"
 
-    def _get_document(self, file_path: str) -> HNPXDocument:
-        """Get or load a document."""
-        abs_path = str(Path(file_path).resolve())
-        if abs_path not in self.documents:
-            self.documents[abs_path] = HNPXDocument(abs_path)
-        return self.documents[abs_path]
+    result = {
+        "id": node_id,
+        "tag": element.tag,
+        "attributes": doc.get_element_attributes(element),
+        "summary": doc.get_element_summary(element),
+        "text": doc.get_element_text(element)
+        if element.tag == "paragraph"
+        else None,
+    }
 
-    async def _get_node(self, arguments: Dict[str, Any]) -> CallToolResult:
-        """Get a node by ID."""
-        file_path = arguments["file_path"]
-        node_id = arguments["node_id"]
+    return json.dumps(result, indent=2)
 
-        doc = self._get_document(file_path)
-        element = doc.get_element_by_id(node_id)
 
-        if element is None:
-            return CallToolResult(
-                content=[
-                    TextContent(type="text", text=f"Node with ID '{node_id}' not found")
-                ],
-                isError=True,
-            )
+@mcp.tool()
+def get_node_context(file_path: str, node_id: str, include_text: bool = False) -> str:
+    """Get context for a node (siblings, parent, parent's siblings)."""
+    doc = get_document(file_path)
+    element = doc.get_element_by_id(node_id)
 
-        result = {
+    if element is None:
+        return f"Node with ID '{node_id}' not found"
+
+    # Get parent
+    parent = doc.get_parent(element)
+    parent_info = None
+    if parent:
+        parent_info = {
+            "id": parent.get("id"),
+            "tag": parent.tag,
+            "summary": doc.get_element_summary(parent),
+        }
+
+    # Get siblings
+    siblings = doc.get_siblings(element)
+    sibling_info = []
+    for sibling in siblings:
+        sibling_data = {
+            "id": sibling.get("id"),
+            "tag": sibling.tag,
+            "summary": doc.get_element_summary(sibling),
+        }
+        if include_text and sibling.tag == "paragraph":
+            sibling_data["text"] = doc.get_element_text(sibling)
+        sibling_info.append(sibling_data)
+
+    # Get parent's siblings
+    parent_siblings = []
+    if parent:
+        for parent_sibling in doc.get_siblings(parent):
+            parent_sibling_data = {
+                "id": parent_sibling.get("id"),
+                "tag": parent_sibling.tag,
+                "summary": doc.get_element_summary(parent_sibling),
+            }
+            parent_siblings.append(parent_sibling_data)
+
+    result = {
+        "node": {
             "id": node_id,
             "tag": element.tag,
-            "attributes": doc.get_element_attributes(element),
             "summary": doc.get_element_summary(element),
-            "text": doc.get_element_text(element)
-            if element.tag == "paragraph"
-            else None,
-        }
+        },
+        "parent": parent_info,
+        "siblings": sibling_info,
+        "parent_siblings": parent_siblings,
+    }
 
-        return CallToolResult(
-            content=[TextContent(type="text", text=json.dumps(result, indent=2))]
-        )
+    return json.dumps(result, indent=2)
 
-    async def _get_node_context(self, arguments: Dict[str, Any]) -> CallToolResult:
-        """Get context for a node."""
-        file_path = arguments["file_path"]
-        node_id = arguments["node_id"]
-        include_text = arguments.get("include_text", False)
 
-        doc = self._get_document(file_path)
-        element = doc.get_element_by_id(node_id)
+@mcp.tool()
+def set_node_children(file_path: str, node_id: str, children_xml: str) -> str:
+    """Replace a node's entire children list."""
+    doc = get_document(file_path)
 
-        if element is None:
-            return CallToolResult(
-                content=[
-                    TextContent(type="text", text=f"Node with ID '{node_id}' not found")
-                ],
-                isError=True,
-            )
+    try:
+        # Parse the children XML
+        parser = etree.XMLParser(remove_blank_text=True)
+        children_fragment = etree.fromstring(f"<root>{children_xml}</root>", parser)
+        new_children = list(children_fragment)
 
-        # Get parent
-        parent = doc.get_parent(element)
-        parent_info = None
-        if parent:
-            parent_info = {
-                "id": parent.get("id"),
-                "tag": parent.tag,
-                "summary": doc.get_element_summary(parent),
-            }
-
-        # Get siblings
-        siblings = doc.get_siblings(element)
-        sibling_info = []
-        for sibling in siblings:
-            sibling_data = {
-                "id": sibling.get("id"),
-                "tag": sibling.tag,
-                "summary": doc.get_element_summary(sibling),
-            }
-            if include_text and sibling.tag == "paragraph":
-                sibling_data["text"] = doc.get_element_text(sibling)
-            sibling_info.append(sibling_data)
-
-        # Get parent's siblings
-        parent_siblings = []
-        if parent:
-            for parent_sibling in doc.get_siblings(parent):
-                parent_sibling_data = {
-                    "id": parent_sibling.get("id"),
-                    "tag": parent_sibling.tag,
-                    "summary": doc.get_element_summary(parent_sibling),
-                }
-                parent_siblings.append(parent_sibling_data)
-
-        result = {
-            "node": {
-                "id": node_id,
-                "tag": element.tag,
-                "summary": doc.get_element_summary(element),
-            },
-            "parent": parent_info,
-            "siblings": sibling_info,
-            "parent_siblings": parent_siblings,
-        }
-
-        return CallToolResult(
-            content=[TextContent(type="text", text=json.dumps(result, indent=2))]
-        )
-
-    async def _set_node_children(self, arguments: Dict[str, Any]) -> CallToolResult:
-        """Replace a node's children list."""
-        file_path = arguments["file_path"]
-        node_id = arguments["node_id"]
-        children_xml = arguments["children_xml"]
-
-        doc = self._get_document(file_path)
-
-        try:
-            # Parse the children XML
-            parser = etree.XMLParser(remove_blank_text=True)
-            children_fragment = etree.fromstring(f"<root>{children_xml}</root>", parser)
-            new_children = list(children_fragment)
-
-            success = doc.set_node_children(node_id, new_children)
-
-            if success:
-                return CallToolResult(
-                    content=[
-                        TextContent(
-                            type="text",
-                            text=f"Successfully updated children for node '{node_id}'",
-                        )
-                    ]
-                )
-            else:
-                return CallToolResult(
-                    content=[
-                        TextContent(
-                            type="text",
-                            text=f"Failed to update children for node '{node_id}'",
-                        )
-                    ],
-                    isError=True,
-                )
-        except etree.XMLSyntaxError as e:
-            return CallToolResult(
-                content=[
-                    TextContent(type="text", text=f"Invalid XML in children: {e}")
-                ],
-                isError=True,
-            )
-
-    async def _append_node_children(self, arguments: Dict[str, Any]) -> CallToolResult:
-        """Append children to a node."""
-        file_path = arguments["file_path"]
-        node_id = arguments["node_id"]
-        children_xml = arguments["children_xml"]
-
-        doc = self._get_document(file_path)
-
-        try:
-            # Parse the children XML
-            parser = etree.XMLParser(remove_blank_text=True)
-            children_fragment = etree.fromstring(f"<root>{children_xml}</root>", parser)
-            new_children = list(children_fragment)
-
-            success = doc.append_children(node_id, new_children)
-
-            if success:
-                return CallToolResult(
-                    content=[
-                        TextContent(
-                            type="text",
-                            text=f"Successfully appended children to node '{node_id}'",
-                        )
-                    ]
-                )
-            else:
-                return CallToolResult(
-                    content=[
-                        TextContent(
-                            type="text",
-                            text=f"Failed to append children to node '{node_id}'",
-                        )
-                    ],
-                    isError=True,
-                )
-        except etree.XMLSyntaxError as e:
-            return CallToolResult(
-                content=[
-                    TextContent(type="text", text=f"Invalid XML in children: {e}")
-                ],
-                isError=True,
-            )
-
-    async def _remove_node(self, arguments: Dict[str, Any]) -> CallToolResult:
-        """Remove a node by ID."""
-        file_path = arguments["file_path"]
-        node_id = arguments["node_id"]
-
-        doc = self._get_document(file_path)
-        success = doc.remove_element(node_id)
+        success = doc.set_node_children(node_id, new_children)
 
         if success:
-            return CallToolResult(
-                content=[
-                    TextContent(
-                        type="text", text=f"Successfully removed node '{node_id}'"
-                    )
-                ]
-            )
+            return f"Successfully updated children for node '{node_id}'"
         else:
-            return CallToolResult(
-                content=[
-                    TextContent(type="text", text=f"Failed to remove node '{node_id}'")
-                ],
-                isError=True,
-            )
+            return f"Failed to update children for node '{node_id}'"
+    except etree.XMLSyntaxError as e:
+        return f"Invalid XML in children: {e}"
 
-    async def _edit_node_attributes(self, arguments: Dict[str, Any]) -> CallToolResult:
-        """Edit node attributes."""
-        file_path = arguments["file_path"]
-        node_id = arguments["node_id"]
-        attributes = arguments["attributes"]
 
-        doc = self._get_document(file_path)
-        success = doc.edit_element_attributes(node_id, attributes)
+@mcp.tool()
+def append_node_children(file_path: str, node_id: str, children_xml: str) -> str:
+    """Append children to a node's existing children list."""
+    doc = get_document(file_path)
+
+    try:
+        # Parse the children XML
+        parser = etree.XMLParser(remove_blank_text=True)
+        children_fragment = etree.fromstring(f"<root>{children_xml}</root>", parser)
+        new_children = list(children_fragment)
+
+        success = doc.append_children(node_id, new_children)
 
         if success:
-            return CallToolResult(
-                content=[
-                    TextContent(
-                        type="text",
-                        text=f"Successfully updated attributes for node '{node_id}'",
-                    )
-                ]
-            )
+            return f"Successfully appended children to node '{node_id}'"
         else:
-            return CallToolResult(
-                content=[
-                    TextContent(
-                        type="text",
-                        text=f"Failed to update attributes for node '{node_id}'",
-                    )
-                ],
-                isError=True,
-            )
+            return f"Failed to append children to node '{node_id}'"
+    except etree.XMLSyntaxError as e:
+        return f"Invalid XML in children: {e}"
 
-    async def _get_empty_containers(self, arguments: Dict[str, Any]) -> CallToolResult:
-        """Get empty containers that need children."""
-        file_path = arguments["file_path"]
-        limit = arguments.get("limit", 10)
 
-        doc = self._get_document(file_path)
-        empty_containers = doc.find_empty_containers(limit)
+@mcp.tool()
+def remove_node(file_path: str, node_id: str) -> str:
+    """Remove a node by ID."""
+    doc = get_document(file_path)
+    success = doc.remove_element(node_id)
 
-        result = []
-        for container in empty_containers:
-            container_data = {
-                "id": container.get("id"),
-                "tag": container.tag,
-                "summary": doc.get_element_summary(container),
-                "attributes": doc.get_element_attributes(container),
-            }
-            result.append(container_data)
+    if success:
+        return f"Successfully removed node '{node_id}'"
+    else:
+        return f"Failed to remove node '{node_id}'"
 
-        return CallToolResult(
-            content=[TextContent(type="text", text=json.dumps(result, indent=2))]
-        )
 
-    async def _search_nodes(self, arguments: Dict[str, Any]) -> CallToolResult:
-        """Search for nodes."""
-        file_path = arguments["file_path"]
-        tag = arguments.get("tag")
-        attributes = arguments.get("attributes")
-        text_contains = arguments.get("text_contains")
-        summary_contains = arguments.get("summary_contains")
+@mcp.tool()
+def edit_node_attributes(file_path: str, node_id: str, attributes: Dict[str, str]) -> str:
+    """Edit node attributes."""
+    doc = get_document(file_path)
+    success = doc.edit_element_attributes(node_id, attributes)
 
-        doc = self._get_document(file_path)
-        results = doc.search_elements(tag, attributes, text_contains, summary_contains)
+    if success:
+        return f"Successfully updated attributes for node '{node_id}'"
+    else:
+        return f"Failed to update attributes for node '{node_id}'"
 
-        result_data = []
-        for element in results:
-            element_data = {
-                "id": element.get("id"),
-                "tag": element.tag,
-                "summary": doc.get_element_summary(element),
-                "attributes": doc.get_element_attributes(element),
-            }
-            if element.tag == "paragraph":
-                element_data["text"] = doc.get_element_text(element)
-            result_data.append(element_data)
 
-        return CallToolResult(
-            content=[TextContent(type="text", text=json.dumps(result_data, indent=2))]
-        )
+@mcp.tool()
+def get_empty_containers(file_path: str, limit: int = 10) -> str:
+    """Get first N container tags that need children populated."""
+    doc = get_document(file_path)
+    empty_containers = doc.find_empty_containers(limit)
 
-    async def _validate_document(self, arguments: Dict[str, Any]) -> CallToolResult:
-        """Validate document against schema."""
-        file_path = arguments["file_path"]
+    result = []
+    for container in empty_containers:
+        container_data = {
+            "id": container.get("id"),
+            "tag": container.tag,
+            "summary": doc.get_element_summary(container),
+            "attributes": doc.get_element_attributes(container),
+        }
+        result.append(container_data)
 
-        doc = self._get_document(file_path)
-        is_valid, errors = doc.validate()
+    return json.dumps(result, indent=2)
 
-        result = {"valid": is_valid, "errors": errors}
 
-        return CallToolResult(
-            content=[TextContent(type="text", text=json.dumps(result, indent=2))]
-        )
+@mcp.tool()
+def search_nodes(
+    file_path: str,
+    tag: str = None,
+    attributes: Dict[str, str] = None,
+    text_contains: str = None,
+    summary_contains: str = None
+) -> str:
+    """Search for nodes matching criteria."""
+    doc = get_document(file_path)
+    results = doc.search_elements(tag, attributes, text_contains, summary_contains)
 
-    async def _get_document_stats(self, arguments: Dict[str, Any]) -> CallToolResult:
-        """Get document statistics."""
-        file_path = arguments["file_path"]
+    result_data = []
+    for element in results:
+        element_data = {
+            "id": element.get("id"),
+            "tag": element.tag,
+            "summary": doc.get_element_summary(element),
+            "attributes": doc.get_element_attributes(element),
+        }
+        if element.tag == "paragraph":
+            element_data["text"] = doc.get_element_text(element)
+        result_data.append(element_data)
 
-        doc = self._get_document(file_path)
-        stats = doc.get_document_stats()
+    return json.dumps(result_data, indent=2)
 
-        return CallToolResult(
-            content=[TextContent(type="text", text=json.dumps(stats, indent=2))]
-        )
 
-    async def _export_document(self, arguments: Dict[str, Any]) -> CallToolResult:
-        """Export document to other formats."""
-        file_path = arguments["file_path"]
-        format_type = arguments["format"]
-        include_summaries = arguments.get("include_summaries", True)
+@mcp.tool()
+def validate_document(file_path: str) -> str:
+    """Validate HNPX document against schema."""
+    doc = get_document(file_path)
+    is_valid, errors = doc.validate()
 
-        doc = self._get_document(file_path)
+    result = {"valid": is_valid, "errors": errors}
+    return json.dumps(result, indent=2)
 
-        if format_type == "plain":
-            exported = self._export_plain_text(doc, include_summaries)
-        elif format_type == "markdown":
-            exported = self._export_markdown(doc, include_summaries)
-        else:
-            return CallToolResult(
-                content=[
-                    TextContent(
-                        type="text", text=f"Unsupported export format: {format_type}"
-                    )
-                ],
-                isError=True,
-            )
 
-        return CallToolResult(content=[TextContent(type="text", text=exported)])
+@mcp.tool()
+def get_document_stats(file_path: str) -> str:
+    """Get statistics about the HNPX document."""
+    doc = get_document(file_path)
+    stats = doc.get_document_stats()
+    return json.dumps(stats, indent=2)
 
-    def _export_plain_text(self, doc: HNPXDocument, include_summaries: bool) -> str:
-        """Export document as plain text."""
-        lines = []
 
-        # Add book summary
+@mcp.tool()
+def export_document(file_path: str, format: str, include_summaries: bool = True) -> str:
+    """Export HNPX document to other formats."""
+    doc = get_document(file_path)
+
+    if format == "plain":
+        return export_plain_text(doc, include_summaries)
+    elif format == "markdown":
+        return export_markdown(doc, include_summaries)
+    else:
+        return f"Unsupported export format: {format}"
+
+
+def export_plain_text(doc: HNPXDocument, include_summaries: bool) -> str:
+    """Export document as plain text."""
+    lines = []
+
+    # Add book summary
+    if include_summaries:
+        book_summary = doc.get_element_summary(doc.root)
+        if book_summary:
+            lines.append(f"BOOK: {book_summary}")
+            lines.append("")
+
+    # Process chapters
+    for chapter in doc.root.xpath("chapter"):
         if include_summaries:
-            book_summary = doc.get_element_summary(doc.root)
-            if book_summary:
-                lines.append(f"BOOK: {book_summary}")
-                lines.append("")
-
-        # Process chapters
-        for chapter in doc.root.xpath("chapter"):
-            if include_summaries:
-                chapter_summary = doc.get_element_summary(chapter)
-                chapter_title = chapter.get("title", "Untitled Chapter")
-                lines.append(f"CHAPTER: {chapter_title}")
-                if chapter_summary:
-                    lines.append(f"Summary: {chapter_summary}")
-                lines.append("")
-
-            # Process sequences
-            for sequence in chapter.xpath("sequence"):
-                if include_summaries:
-                    sequence_summary = doc.get_element_summary(sequence)
-                    sequence_loc = sequence.get("loc", "Unknown Location")
-                    lines.append(f"SEQUENCE: {sequence_loc}")
-                    if sequence_summary:
-                        lines.append(f"Summary: {sequence_summary}")
-                    lines.append("")
-
-                # Process beats
-                for beat in sequence.xpath("beat"):
-                    if include_summaries:
-                        beat_summary = doc.get_element_summary(beat)
-                        if beat_summary:
-                            lines.append(f"Beat: {beat_summary}")
-
-                    # Process paragraphs
-                    for paragraph in beat.xpath("paragraph"):
-                        text = doc.get_element_text(paragraph)
-                        if text:
-                            lines.append(text)
-
-                    if include_summaries and beat_summary:
-                        lines.append("")
-
-                if include_summaries:
-                    lines.append("")
-
-            if include_summaries:
-                lines.append("")
-
-        return "\n".join(lines)
-
-    def _export_markdown(self, doc: HNPXDocument, include_summaries: bool) -> str:
-        """Export document as Markdown."""
-        lines = []
-
-        # Add book summary
-        if include_summaries:
-            book_summary = doc.get_element_summary(doc.root)
-            if book_summary:
-                lines.append(f"# {book_summary}")
-                lines.append("")
-
-        # Process chapters
-        for chapter in doc.root.xpath("chapter"):
+            chapter_summary = doc.get_element_summary(chapter)
             chapter_title = chapter.get("title", "Untitled Chapter")
-            lines.append(f"## {chapter_title}")
+            lines.append(f"CHAPTER: {chapter_title}")
+            if chapter_summary:
+                lines.append(f"Summary: {chapter_summary}")
+            lines.append("")
 
+        # Process sequences
+        for sequence in chapter.xpath("sequence"):
             if include_summaries:
-                chapter_summary = doc.get_element_summary(chapter)
-                if chapter_summary:
-                    lines.append(f"*{chapter_summary}*")
-                lines.append("")
-
-            # Process sequences
-            for sequence in chapter.xpath("sequence"):
+                sequence_summary = doc.get_element_summary(sequence)
                 sequence_loc = sequence.get("loc", "Unknown Location")
-                lines.append(f"### {sequence_loc}")
+                lines.append(f"SEQUENCE: {sequence_loc}")
+                if sequence_summary:
+                    lines.append(f"Summary: {sequence_summary}")
+                lines.append("")
 
+            # Process beats
+            for beat in sequence.xpath("beat"):
                 if include_summaries:
-                    sequence_summary = doc.get_element_summary(sequence)
-                    if sequence_summary:
-                        lines.append(f"*{sequence_summary}*")
-                    lines.append("")
+                    beat_summary = doc.get_element_summary(beat)
+                    if beat_summary:
+                        lines.append(f"Beat: {beat_summary}")
 
-                # Process beats
-                for beat in sequence.xpath("beat"):
-                    if include_summaries:
-                        beat_summary = doc.get_element_summary(beat)
-                        if beat_summary:
-                            lines.append(f"**{beat_summary}**")
+                # Process paragraphs
+                for paragraph in beat.xpath("paragraph"):
+                    text = doc.get_element_text(paragraph)
+                    if text:
+                        lines.append(text)
 
-                    # Process paragraphs
-                    for paragraph in beat.xpath("paragraph"):
-                        text = doc.get_element_text(paragraph)
-                        mode = paragraph.get("mode", "narration")
-                        char = paragraph.get("char")
-
-                        if mode == "dialogue":
-                            lines.append(f"> **{char}**: {text}")
-                        elif mode == "internal":
-                            lines.append(f"*{char} (thoughts): {text}*")
-                        else:
-                            lines.append(text)
-
-                    if include_summaries and beat_summary:
-                        lines.append("")
-
-                if include_summaries:
+                if include_summaries and beat_summary:
                     lines.append("")
 
             if include_summaries:
                 lines.append("")
 
-        return "\n".join(lines)
+        if include_summaries:
+            lines.append("")
 
-    async def _save_document(self, arguments: Dict[str, Any]) -> CallToolResult:
-        """Save document to file."""
-        file_path = arguments["file_path"]
-        output_path = arguments.get("output_path", file_path)
-
-        doc = self._get_document(file_path)
-        success = doc.save(output_path)
-
-        if success:
-            return CallToolResult(
-                content=[
-                    TextContent(
-                        type="text",
-                        text=f"Successfully saved document to '{output_path}'",
-                    )
-                ]
-            )
-        else:
-            return CallToolResult(
-                content=[
-                    TextContent(
-                        type="text", text=f"Failed to save document to '{output_path}'"
-                    )
-                ],
-                isError=True,
-            )
+    return "\n".join(lines)
 
 
-async def main():
-    """Main entry point for the MCP server."""
-    hnpx_server = HNPXMCPServer()
+def export_markdown(doc: HNPXDocument, include_summaries: bool) -> str:
+    """Export document as Markdown."""
+    lines = []
 
-    # Use stdio server
-    async with stdio_server() as (read_stream, write_stream):
-        await hnpx_server.server.run(
-            read_stream,
-            write_stream,
-            InitializationOptions(
-                server_name="hnpx-server",
-                server_version="0.1.0",
-                capabilities=hnpx_server.server.get_capabilities(
-                    notification_options=None,
-                    experimental_capabilities=None,
-                ),
-            ),
-        )
+    # Add book summary
+    if include_summaries:
+        book_summary = doc.get_element_summary(doc.root)
+        if book_summary:
+            lines.append(f"# {book_summary}")
+            lines.append("")
+
+    # Process chapters
+    for chapter in doc.root.xpath("chapter"):
+        chapter_title = chapter.get("title", "Untitled Chapter")
+        lines.append(f"## {chapter_title}")
+
+        if include_summaries:
+            chapter_summary = doc.get_element_summary(chapter)
+            if chapter_summary:
+                lines.append(f"*{chapter_summary}*")
+            lines.append("")
+
+        # Process sequences
+        for sequence in chapter.xpath("sequence"):
+            sequence_loc = sequence.get("loc", "Unknown Location")
+            lines.append(f"### {sequence_loc}")
+
+            if include_summaries:
+                sequence_summary = doc.get_element_summary(sequence)
+                if sequence_summary:
+                    lines.append(f"*{sequence_summary}*")
+                lines.append("")
+
+            # Process beats
+            for beat in sequence.xpath("beat"):
+                if include_summaries:
+                    beat_summary = doc.get_element_summary(beat)
+                    if beat_summary:
+                        lines.append(f"**{beat_summary}**")
+
+                # Process paragraphs
+                for paragraph in beat.xpath("paragraph"):
+                    text = doc.get_element_text(paragraph)
+                    mode = paragraph.get("mode", "narration")
+                    char = paragraph.get("char")
+
+                    if mode == "dialogue":
+                        lines.append(f"> **{char}**: {text}")
+                    elif mode == "internal":
+                        lines.append(f"*{char} (thoughts): {text}*")
+                    else:
+                        lines.append(text)
+
+                if include_summaries and beat_summary:
+                    lines.append("")
+
+            if include_summaries:
+                lines.append("")
+
+        if include_summaries:
+            lines.append("")
+
+    return "\n".join(lines)
+
+
+@mcp.tool()
+def save_document(file_path: str, output_path: str = None) -> str:
+    """Save changes to the HNPX document."""
+    if output_path is None:
+        output_path = file_path
+
+    doc = get_document(file_path)
+    success = doc.save(output_path)
+
+    if success:
+        return f"Successfully saved document to '{output_path}'"
+    else:
+        return f"Failed to save document to '{output_path}'"
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    mcp.run()
