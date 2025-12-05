@@ -9,7 +9,7 @@ from typing import Dict
 from lxml import etree
 from fastmcp import FastMCP
 
-from .hnpx import HNPXDocument
+from .hnpx import HNPXDocument, generate_id
 
 # Initialize FastMCP server
 mcp = FastMCP("hnpx-server")
@@ -113,6 +113,15 @@ def set_node_children(file_path: str, node_id: str, children_xml: str) -> str:
         parser = etree.XMLParser(remove_blank_text=True)
         children_fragment = etree.fromstring(f"<root>{children_xml}</root>", parser)
         new_children = list(children_fragment)
+        
+        # Ensure all new elements have IDs
+        for child in new_children:
+            if child.get("id") is None:
+                child.set("id", generate_id())
+            # Recursively check nested elements
+            for descendant in child.xpath(".//*[@id]"):
+                if descendant.get("id") is None:
+                    descendant.set("id", generate_id())
 
         success = doc.set_node_children(node_id, new_children)
 
@@ -134,6 +143,15 @@ def append_node_children(file_path: str, node_id: str, children_xml: str) -> str
         parser = etree.XMLParser(remove_blank_text=True)
         children_fragment = etree.fromstring(f"<root>{children_xml}</root>", parser)
         new_children = list(children_fragment)
+        
+        # Ensure all new elements have IDs
+        for child in new_children:
+            if child.get("id") is None:
+                child.set("id", generate_id())
+            # Recursively check nested elements
+            for descendant in child.xpath(".//*[@id]"):
+                if descendant.get("id") is None:
+                    descendant.set("id", generate_id())
 
         success = doc.append_children(node_id, new_children)
 
