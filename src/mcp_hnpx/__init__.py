@@ -1,8 +1,8 @@
 """
-MCP HNPX Server - A Model Context Protocol server for HNPX document processing.
+MCP Server for HNPX document manipulation.
 """
 
-__version__ = "1.0.0"
-__all__ = ["HNPXMCP", "run_server"]
+from .server import mcp
 
-from .server import HNPXMCP, run_server
+__version__ = "0.1.0"
+__all__ = ["mcp"]
