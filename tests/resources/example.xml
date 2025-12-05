@@ -40,14 +40,6 @@
       
       <beat id="b9v4f8">
         <summary>Discussion about Kirima Nagi.</summary>
-        
-        <paragraph id="p2x1g5" mode="dialogue" char="kyoko">
-          <summary>Kyoko asks about who might be a killer in their class.</summary>
-        </paragraph>
-        
-        <paragraph id="p7y3h6" mode="dialogue" char="suema">
-          <summary>Suema's general response.</summary>
-        </paragraph>
       </beat>
     </sequence>
   </chapter>
