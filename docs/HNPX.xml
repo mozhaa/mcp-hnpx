@@ -15,7 +15,6 @@
   </xs:simpleType>
   <xs:simpleType name="timeType">
     <xs:restriction base="xs:string">
-      <xs:pattern value="[^<>]*"/>
       <xs:maxLength value="100"/>
     </xs:restriction>
   </xs:simpleType>
