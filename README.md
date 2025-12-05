@@ -23,8 +23,8 @@ Add this server to your MCP configuration file:
 {
   "mcpServers": {
     "hnpx": {
-      "command": "python",
-      "args": ["-m", "mcp_hnpx.server"],
+      "command": "mcp-hnpx",
+      "args": [],
       "env": {}
     }
   }
