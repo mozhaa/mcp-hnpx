@@ -42,13 +42,7 @@ class HNPXMCP:
         @self.mcp.tool()
         def get_next_empty_container_tool(file_path: str) -> dict[str, Any]:
             """Finds the next container node in BFS order that needs children."""
-            result = get_next_empty_container(file_path)
-            if result is None:
-                return {
-                    "message": "Document is fully expanded",
-                    "fully_expanded": True,
-                }
-            return result
+            return get_next_empty_container(file_path) or {}
 
         @self.mcp.tool()
         def get_node_tool(file_path: str, node_id: str) -> str:
