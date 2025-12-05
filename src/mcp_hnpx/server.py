@@ -92,9 +92,7 @@ class HNPXMCP:
             pov: str = None,
         ) -> dict[str, Any]:
             """Creates a new sequence element."""
-            return create_sequence(
-                file_path, parent_id, location, summary, time, pov
-            )
+            return create_sequence(file_path, parent_id, location, summary, time, pov)
 
         @self.mcp.tool()
         def create_beat_tool(
