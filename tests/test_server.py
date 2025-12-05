@@ -17,7 +17,7 @@ def test_hnpx_element_by_id():
     # Get the first element with an ID from the document
     elements_with_ids = doc.root.xpath("//*[@id]")
     assert len(elements_with_ids) > 0, "No elements with IDs found in example.xml"
-    
+
     first_element_id = elements_with_ids[0].get("id")
     node = doc.get_element_by_id(first_element_id)
     assert node is not None
@@ -135,14 +135,14 @@ def test_element_creation():
     # But get_children should exclude summary, so only 1 child (paragraph)
     doc = HNPXDocument("tests/resources/example.xml")
     assert len(doc.get_children(beat)) == 1
-    
+
     # Test creating elements with auto-generated IDs
     auto_para = create_element("paragraph", summary="Auto-generated paragraph")
     assert auto_para.tag == "paragraph"
     assert auto_para.get("id") is not None
     assert len(auto_para.get("id")) == 6
     assert auto_para.find("summary").text == "Auto-generated paragraph"
-    
+
     auto_beat = create_element("beat", summary="Auto-generated beat")
     assert auto_beat.tag == "beat"
     assert auto_beat.get("id") is not None
@@ -158,9 +158,9 @@ def test_mcp_server_get_node():
     doc = HNPXDocument("tests/resources/example.xml")
     elements_with_ids = doc.root.xpath("//*[@id]")
     assert len(elements_with_ids) > 0, "No elements with IDs found in example.xml"
-    
+
     first_element_id = elements_with_ids[0].get("id")
-    
+
     # Access the underlying function from the FastMCP tool
     result = get_node.fn("tests/resources/example.xml", first_element_id)
     assert result is not None

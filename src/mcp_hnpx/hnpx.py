@@ -342,7 +342,7 @@ def create_element(
     # Generate a random ID if none is provided
     if element_id is None:
         element_id = generate_id()
-    
+
     element = etree.Element(tag, id=element_id, **attributes)
     summary_elem = etree.SubElement(element, "summary")
     summary_elem.text = summary

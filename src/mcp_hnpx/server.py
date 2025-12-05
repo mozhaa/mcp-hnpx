@@ -113,7 +113,7 @@ def set_node_children(file_path: str, node_id: str, children_xml: str) -> str:
         parser = etree.XMLParser(remove_blank_text=True)
         children_fragment = etree.fromstring(f"<root>{children_xml}</root>", parser)
         new_children = list(children_fragment)
-        
+
         # Always generate random IDs for all new elements, overriding any existing IDs
         for child in new_children:
             child.set("id", generate_id())
@@ -141,7 +141,7 @@ def append_node_children(file_path: str, node_id: str, children_xml: str) -> str
         parser = etree.XMLParser(remove_blank_text=True)
         children_fragment = etree.fromstring(f"<root>{children_xml}</root>", parser)
         new_children = list(children_fragment)
-        
+
         # Always generate random IDs for all new elements, overriding any existing IDs
         for child in new_children:
             child.set("id", generate_id())
