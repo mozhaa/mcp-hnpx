@@ -4,12 +4,12 @@ MCP Server for HNPX document manipulation.
 
 import json
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 from lxml import etree
 from fastmcp import FastMCP
 
-from .hnpx import HNPXDocument, generate_id, create_element
+from .hnpx import HNPXDocument, create_element
 
 # Initialize FastMCP server
 mcp = FastMCP("hnpx-server")
@@ -108,37 +108,36 @@ def remove_node(file_path: str, node_id: str) -> str:
     """Remove a node by ID."""
     doc = get_document(file_path)
     element = doc.get_element_by_id(node_id)
-    
+
     if element is None:
-        return json.dumps({
-            "success": False,
-            "error": f"Node with ID '{node_id}' not found"
-        })
-    
+        return json.dumps(
+            {"success": False, "error": f"Node with ID '{node_id}' not found"}
+        )
+
     # Cannot remove root element
     if element.tag == "book":
-        return json.dumps({
-            "success": False,
-            "error": "Cannot remove the root book element"
-        })
-    
+        return json.dumps(
+            {"success": False, "error": "Cannot remove the root book element"}
+        )
+
     success = doc.remove_element(node_id)
-    
+
     if success:
         # Auto-validate and auto-save
         is_valid, errors = doc.validate()
         doc.save()
-        
-        return json.dumps({
-            "success": True,
-            "validation": {"valid": is_valid, "errors": errors},
-            "message": f"Successfully removed node '{node_id}'"
-        })
+
+        return json.dumps(
+            {
+                "success": True,
+                "validation": {"valid": is_valid, "errors": errors},
+                "message": f"Successfully removed node '{node_id}'",
+            }
+        )
     else:
-        return json.dumps({
-            "success": False,
-            "error": f"Failed to remove node '{node_id}'"
-        })
+        return json.dumps(
+            {"success": False, "error": f"Failed to remove node '{node_id}'"}
+        )
 
 
 @mcp.tool()
@@ -148,35 +147,35 @@ def edit_node_attributes(
     """Edit node attributes with validation."""
     doc = get_document(file_path)
     element = doc.get_element_by_id(node_id)
-    
+
     if element is None:
-        return json.dumps({
-            "success": False,
-            "error": f"Node with ID '{node_id}' not found"
-        })
-    
+        return json.dumps(
+            {"success": False, "error": f"Node with ID '{node_id}' not found"}
+        )
+
     # Validate attributes
     is_valid_attrs, attr_errors = doc.validate_attributes(element.tag, attributes)
-    
+
     if not is_valid_attrs:
-        return json.dumps({
-            "success": False,
-            "error": f"Invalid attributes: {'; '.join(attr_errors)}"
-        })
-    
+        return json.dumps(
+            {"success": False, "error": f"Invalid attributes: {'; '.join(attr_errors)}"}
+        )
+
     # Apply changes
     for attr_name, attr_value in attributes.items():
         element.set(attr_name, attr_value)
-    
+
     # Auto-validate and auto-save
     is_valid, errors = doc.validate()
     doc.save()
-    
-    return json.dumps({
-        "success": True,
-        "validation": {"valid": is_valid, "errors": errors},
-        "message": f"Successfully updated attributes for node '{node_id}'"
-    })
+
+    return json.dumps(
+        {
+            "success": True,
+            "validation": {"valid": is_valid, "errors": errors},
+            "message": f"Successfully updated attributes for node '{node_id}'",
+        }
+    )
 
 
 @mcp.tool()
@@ -319,201 +318,214 @@ def create_document(file_path: str, title: str = "Untitled Book") -> str:
 
 # ===== NEW CREATION TOOLS =====
 
+
 @mcp.tool()
-def create_chapter(file_path: str, parent_id: str, title: str, summary: str, pov: str = None) -> str:
+def create_chapter(
+    file_path: str, parent_id: str, title: str, summary: str, pov: str = None
+) -> str:
     """Create a new chapter element."""
     doc = get_document(file_path)
-    
+
     # Validate parent exists and is a book
     parent = doc.get_element_by_id(parent_id)
     if parent is None:
-        return json.dumps({
-            "success": False,
-            "error": f"Parent node with ID '{parent_id}' not found"
-        })
-    
+        return json.dumps(
+            {"success": False, "error": f"Parent node with ID '{parent_id}' not found"}
+        )
+
     if parent.tag != "book":
-        return json.dumps({
-            "success": False,
-            "error": f"Chapters can only be created under book elements, not '{parent.tag}'"
-        })
-    
+        return json.dumps(
+            {
+                "success": False,
+                "error": f"Chapters can only be created under book elements, not '{parent.tag}'",
+            }
+        )
+
     # Create attributes
     attributes = {"title": title}
     if pov:
         attributes["pov"] = pov
-    
+
     # Create the chapter
     new_id = doc.create_child_element(parent_id, "chapter", summary, **attributes)
-    
+
     if new_id:
         # Auto-validate
         is_valid, errors = doc.validate()
-        return json.dumps({
-            "success": True,
-            "validation": {"valid": is_valid, "errors": errors},
-            "new_ids": [new_id],
-            "message": f"Successfully created chapter '{title}' with ID '{new_id}'"
-        })
+        return json.dumps(
+            {
+                "success": True,
+                "validation": {"valid": is_valid, "errors": errors},
+                "new_ids": [new_id],
+                "message": f"Successfully created chapter '{title}' with ID '{new_id}'",
+            }
+        )
     else:
-        return json.dumps({
-            "success": False,
-            "error": "Failed to create chapter"
-        })
+        return json.dumps({"success": False, "error": "Failed to create chapter"})
 
 
 @mcp.tool()
-def create_sequence(file_path: str, parent_id: str, location: str, summary: str, time: str = None, pov: str = None) -> str:
+def create_sequence(
+    file_path: str,
+    parent_id: str,
+    location: str,
+    summary: str,
+    time: str = None,
+    pov: str = None,
+) -> str:
     """Create a new sequence element."""
     doc = get_document(file_path)
-    
+
     # Validate parent exists and is a chapter
     parent = doc.get_element_by_id(parent_id)
     if parent is None:
-        return json.dumps({
-            "success": False,
-            "error": f"Parent node with ID '{parent_id}' not found"
-        })
-    
+        return json.dumps(
+            {"success": False, "error": f"Parent node with ID '{parent_id}' not found"}
+        )
+
     if parent.tag != "chapter":
-        return json.dumps({
-            "success": False,
-            "error": f"Sequences can only be created under chapter elements, not '{parent.tag}'"
-        })
-    
+        return json.dumps(
+            {
+                "success": False,
+                "error": f"Sequences can only be created under chapter elements, not '{parent.tag}'",
+            }
+        )
+
     # Create attributes
     attributes = {"loc": location}
     if time:
         attributes["time"] = time
     if pov:
         attributes["pov"] = pov
-    
+
     # Create the sequence
     new_id = doc.create_child_element(parent_id, "sequence", summary, **attributes)
-    
+
     if new_id:
         # Auto-validate
         is_valid, errors = doc.validate()
-        return json.dumps({
-            "success": True,
-            "validation": {"valid": is_valid, "errors": errors},
-            "new_ids": [new_id],
-            "message": f"Successfully created sequence at '{location}' with ID '{new_id}'"
-        })
+        return json.dumps(
+            {
+                "success": True,
+                "validation": {"valid": is_valid, "errors": errors},
+                "new_ids": [new_id],
+                "message": f"Successfully created sequence at '{location}' with ID '{new_id}'",
+            }
+        )
     else:
-        return json.dumps({
-            "success": False,
-            "error": "Failed to create sequence"
-        })
+        return json.dumps({"success": False, "error": "Failed to create sequence"})
 
 
 @mcp.tool()
 def create_beat(file_path: str, parent_id: str, summary: str) -> str:
     """Create a new beat element."""
     doc = get_document(file_path)
-    
+
     # Validate parent exists and is a sequence
     parent = doc.get_element_by_id(parent_id)
     if parent is None:
-        return json.dumps({
-            "success": False,
-            "error": f"Parent node with ID '{parent_id}' not found"
-        })
-    
+        return json.dumps(
+            {"success": False, "error": f"Parent node with ID '{parent_id}' not found"}
+        )
+
     if parent.tag != "sequence":
-        return json.dumps({
-            "success": False,
-            "error": f"Beats can only be created under sequence elements, not '{parent.tag}'"
-        })
-    
+        return json.dumps(
+            {
+                "success": False,
+                "error": f"Beats can only be created under sequence elements, not '{parent.tag}'",
+            }
+        )
+
     # Create the beat
     new_id = doc.create_child_element(parent_id, "beat", summary)
-    
+
     if new_id:
         # Auto-validate
         is_valid, errors = doc.validate()
-        return json.dumps({
-            "success": True,
-            "validation": {"valid": is_valid, "errors": errors},
-            "new_ids": [new_id],
-            "message": f"Successfully created beat with ID '{new_id}'"
-        })
+        return json.dumps(
+            {
+                "success": True,
+                "validation": {"valid": is_valid, "errors": errors},
+                "new_ids": [new_id],
+                "message": f"Successfully created beat with ID '{new_id}'",
+            }
+        )
     else:
-        return json.dumps({
-            "success": False,
-            "error": "Failed to create beat"
-        })
+        return json.dumps({"success": False, "error": "Failed to create beat"})
 
 
 @mcp.tool()
-def create_paragraph(file_path: str, parent_id: str, summary: str, text: str, mode: str = "narration", char: str = None) -> str:
+def create_paragraph(
+    file_path: str,
+    parent_id: str,
+    summary: str,
+    text: str,
+    mode: str = "narration",
+    char: str = None,
+) -> str:
     """Create a new paragraph element."""
     doc = get_document(file_path)
-    
+
     # Validate parent exists and is a beat
     parent = doc.get_element_by_id(parent_id)
     if parent is None:
-        return json.dumps({
-            "success": False,
-            "error": f"Parent node with ID '{parent_id}' not found"
-        })
-    
+        return json.dumps(
+            {"success": False, "error": f"Parent node with ID '{parent_id}' not found"}
+        )
+
     if parent.tag != "beat":
-        return json.dumps({
-            "success": False,
-            "error": f"Paragraphs can only be created under beat elements, not '{parent.tag}'"
-        })
-    
+        return json.dumps(
+            {
+                "success": False,
+                "error": f"Paragraphs can only be created under beat elements, not '{parent.tag}'",
+            }
+        )
+
     # Create attributes
     attributes = {"mode": mode}
     if char:
         attributes["char"] = char
-    
+
     # Create the paragraph
     new_id = doc.create_child_element(parent_id, "paragraph", summary, **attributes)
-    
+
     if new_id:
         # Set the text content
         paragraph = doc.get_element_by_id(new_id)
         if paragraph is not None:
             paragraph.text = text
-            
+
             # Auto-validate and save
             is_valid, errors = doc.validate()
             doc.save()
-            
-            return json.dumps({
-                "success": True,
-                "validation": {"valid": is_valid, "errors": errors},
-                "new_ids": [new_id],
-                "message": f"Successfully created paragraph with ID '{new_id}'"
-            })
-    
-    return json.dumps({
-        "success": False,
-        "error": "Failed to create paragraph"
-    })
+
+            return json.dumps(
+                {
+                    "success": True,
+                    "validation": {"valid": is_valid, "errors": errors},
+                    "new_ids": [new_id],
+                    "message": f"Successfully created paragraph with ID '{new_id}'",
+                }
+            )
+
+    return json.dumps({"success": False, "error": "Failed to create paragraph"})
 
 
 # ===== NEW NAVIGATION TOOLS =====
+
 
 @mcp.tool()
 def get_node_path(file_path: str, node_id: str) -> str:
     """Get the full path from root to the specified node."""
     doc = get_document(file_path)
     path = doc.get_node_path(node_id)
-    
+
     if not path:
-        return json.dumps({
-            "success": False,
-            "error": f"Node with ID '{node_id}' not found"
-        })
-    
-    return json.dumps({
-        "success": True,
-        "path": path,
-        "node_id": node_id
-    })
+        return json.dumps(
+            {"success": False, "error": f"Node with ID '{node_id}' not found"}
+        )
+
+    return json.dumps({"success": True, "path": path, "node_id": node_id})
 
 
 @mcp.tool()
@@ -521,16 +533,15 @@ def get_direct_children(file_path: str, node_id: str) -> str:
     """Get immediate children of a node (excluding summary elements)."""
     doc = get_document(file_path)
     element = doc.get_element_by_id(node_id)
-    
+
     if element is None:
-        return json.dumps({
-            "success": False,
-            "error": f"Node with ID '{node_id}' not found"
-        })
-    
+        return json.dumps(
+            {"success": False, "error": f"Node with ID '{node_id}' not found"}
+        )
+
     children = doc.get_children(element)
     result = []
-    
+
     for child in children:
         child_data = {
             "id": child.get("id"),
@@ -541,7 +552,7 @@ def get_direct_children(file_path: str, node_id: str) -> str:
         if child.tag == "paragraph":
             child_data["text"] = doc.get_element_text(child)
         result.append(child_data)
-    
+
     return json.dumps(result, indent=2)
 
 
@@ -550,51 +561,50 @@ def render_node(file_path: str, node_id: str, include_summaries: bool = True) ->
     """Render a node and its children as markdown with ID prefixes."""
     doc = get_document(file_path)
     rendered = doc.render_node_with_ids(node_id, include_summaries)
-    
+
     if rendered.startswith(f"Element '{node_id}' not found"):
-        return json.dumps({
-            "success": False,
-            "error": f"Node with ID '{node_id}' not found"
-        })
-    
-    return json.dumps({
-        "success": True,
-        "rendered": rendered,
-        "node_id": node_id
-    })
+        return json.dumps(
+            {"success": False, "error": f"Node with ID '{node_id}' not found"}
+        )
+
+    return json.dumps({"success": True, "rendered": rendered, "node_id": node_id})
 
 
 # ===== NEW MANAGEMENT TOOLS =====
+
 
 @mcp.tool()
 def reorder_children(file_path: str, parent_id: str, child_ids: list) -> str:
     """Reorder children of an element based on provided ID list."""
     doc = get_document(file_path)
-    
+
     # Validate parent exists
     parent = doc.get_element_by_id(parent_id)
     if parent is None:
-        return json.dumps({
-            "success": False,
-            "error": f"Parent node with ID '{parent_id}' not found"
-        })
-    
+        return json.dumps(
+            {"success": False, "error": f"Parent node with ID '{parent_id}' not found"}
+        )
+
     # Attempt to reorder
     success = doc.reorder_children(parent_id, child_ids)
-    
+
     if success:
         # Auto-validate
         is_valid, errors = doc.validate()
-        return json.dumps({
-            "success": True,
-            "validation": {"valid": is_valid, "errors": errors},
-            "message": f"Successfully reordered children of node '{parent_id}'"
-        })
+        return json.dumps(
+            {
+                "success": True,
+                "validation": {"valid": is_valid, "errors": errors},
+                "message": f"Successfully reordered children of node '{parent_id}'",
+            }
+        )
     else:
-        return json.dumps({
-            "success": False,
-            "error": "Failed to reorder children. Check that all child IDs are valid."
-        })
+        return json.dumps(
+            {
+                "success": False,
+                "error": "Failed to reorder children. Check that all child IDs are valid.",
+            }
+        )
 
 
 if __name__ == "__main__":

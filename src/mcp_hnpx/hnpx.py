@@ -331,32 +331,34 @@ class HNPXDocument:
         element = self.get_element_by_id(element_id)
         if element is None:
             return []
-        
+
         path = []
         current = element
-        
+
         while current is not None:
             path.insert(0, f"{current.tag}[{current.get('id')}]")
             current = current.getparent()
-        
+
         return path
 
-    def render_node_with_ids(self, element_id: str, include_summaries: bool = True) -> str:
+    def render_node_with_ids(
+        self, element_id: str, include_summaries: bool = True
+    ) -> str:
         """Render a node and its children as markdown with ID prefixes."""
         element = self.get_element_by_id(element_id)
         if element is None:
             return f"Element '{element_id}' not found"
-        
+
         lines = []
-        
+
         def render_element(elem, level=0):
             elem_id = elem.get("id", "")
             prefix = "  " * level
-            
+
             if elem.tag == "book":
                 title = self.get_element_summary(elem) or "Untitled Book"
                 lines.append(f"{prefix}# [{elem_id}] {title}")
-            
+
             elif elem.tag == "chapter":
                 title = elem.get("title", "Untitled Chapter")
                 lines.append(f"{prefix}## [{elem_id}] {title}")
@@ -364,7 +366,7 @@ class HNPXDocument:
                     summary = self.get_element_summary(elem)
                     if summary:
                         lines.append(f"{prefix}*{summary}*")
-            
+
             elif elem.tag == "sequence":
                 loc = elem.get("loc", "Unknown Location")
                 lines.append(f"{prefix}### [{elem_id}] {loc}")
@@ -372,17 +374,17 @@ class HNPXDocument:
                     summary = self.get_element_summary(elem)
                     if summary:
                         lines.append(f"{prefix}*{summary}*")
-            
+
             elif elem.tag == "beat":
                 summary = self.get_element_summary(elem)
                 if summary:
                     lines.append(f"{prefix}**[{elem_id}] {summary}**")
-            
+
             elif elem.tag == "paragraph":
                 text = self.get_element_text(elem)
                 mode = elem.get("mode", "narration")
                 char = elem.get("char")
-                
+
                 if not text and include_summaries:
                     summary = self.get_element_summary(elem)
                     lines.append(f"{prefix}[{elem_id}] *{summary} (summary only)*")
@@ -393,72 +395,81 @@ class HNPXDocument:
                         lines.append(f"{prefix}[{elem_id}] *{char} (thoughts): {text}*")
                     else:
                         lines.append(f"{prefix}[{elem_id}] {text}")
-            
+
             # Render children
             for child in self.get_children(elem):
                 render_element(child, level + 1)
-        
+
         render_element(element)
         return "\n".join(lines)
 
-    def validate_attributes(self, element_tag: str, attributes: Dict[str, str]) -> Tuple[bool, List[str]]:
+    def validate_attributes(
+        self, element_tag: str, attributes: Dict[str, str]
+    ) -> Tuple[bool, List[str]]:
         """Validate attributes against HNPX schema rules."""
         valid_attrs = {
             "book": [],
             "chapter": ["title", "pov"],
             "sequence": ["loc", "time", "pov"],
             "beat": [],
-            "paragraph": ["mode", "char"]
+            "paragraph": ["mode", "char"],
         }
-        
-        enum_values = {
-            "mode": ["narration", "dialogue", "internal"]
-        }
-        
+
+        enum_values = {"mode": ["narration", "dialogue", "internal"]}
+
         errors = []
-        
+
         # Check if attributes are valid for this element type
         for attr_name, attr_value in attributes.items():
             if attr_name not in valid_attrs.get(element_tag, []):
-                errors.append(f"Invalid attribute '{attr_name}' for element '{element_tag}'")
+                errors.append(
+                    f"Invalid attribute '{attr_name}' for element '{element_tag}'"
+                )
                 continue
-            
+
             # Validate enum values
             if attr_name in enum_values and attr_value not in enum_values[attr_name]:
-                errors.append(f"Invalid {attr_name} '{attr_value}'. Must be one of: {', '.join(enum_values[attr_name])}")
-        
+                errors.append(
+                    f"Invalid {attr_name} '{attr_value}'. Must be one of: {', '.join(enum_values[attr_name])}"
+                )
+
         return len(errors) == 0, errors
 
-    def create_child_element(self, parent_id: str, child_tag: str, summary: str, **attributes) -> Optional[str]:
+    def create_child_element(
+        self, parent_id: str, child_tag: str, summary: str, **attributes
+    ) -> Optional[str]:
         """Create a new child element and return its ID."""
         parent = self.get_element_by_id(parent_id)
         if parent is None:
             return None
-        
+
         # Validate parent-child relationship
         valid_children = {
             "book": ["chapter"],
             "chapter": ["sequence"],
             "sequence": ["beat"],
-            "beat": ["paragraph"]
+            "beat": ["paragraph"],
         }
-        
-        if parent.tag not in valid_children or child_tag not in valid_children[parent.tag]:
+
+        if (
+            parent.tag not in valid_children
+            or child_tag not in valid_children[parent.tag]
+        ):
             return None
-        
+
         # Validate attributes
         is_valid, errors = self.validate_attributes(child_tag, attributes)
         if not is_valid:
             return None
-        
+
         # Create new element
         new_element = create_element(child_tag, summary, **attributes)
         parent.append(new_element)
-        
+
         # Rebuild cache and save
         self._build_id_cache()
         self.save()
-        
+
         return new_element.get("id")
 
     def reorder_children(self, parent_id: str, child_ids: List[str]) -> bool:
@@ -466,28 +477,28 @@ class HNPXDocument:
         parent = self.get_element_by_id(parent_id)
         if parent is None:
             return False
-        
+
         # Get current children (excluding summary)
         current_children = self.get_children(parent)
-        
+
         # Create a mapping of ID to element
         child_map = {child.get("id"): child for child in current_children}
-        
+
         # Validate all child IDs exist
         for child_id in child_ids:
             if child_id not in child_map:
                 return False
-        
+
         # Clear existing children (keep summary)
         summary = parent.find("summary")
         parent.clear()
         if summary is not None:
             parent.append(summary)
-        
+
         # Add children in new order
         for child_id in child_ids:
             parent.append(child_map[child_id])
-        
+
         # Save changes
         self.save()
         return True

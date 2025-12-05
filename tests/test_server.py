@@ -429,6 +429,7 @@ def test_mcp_server_create_document_nested_directory():
 
 # ===== TESTS FOR NEW TOOLS =====
 
+
 def test_mcp_server_create_chapter():
     """Test MCP server create_chapter functionality."""
     import json
@@ -436,33 +437,35 @@ def test_mcp_server_create_chapter():
     import tempfile
     import os
 
-    with tempfile.NamedTemporaryFile(suffix='.xml', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".xml", delete=False) as f:
         test_file = f.name
 
     # Create a basic document
     create_document.fn(test_file, "Test Book")
-    
+
     # Get book ID
     doc = HNPXDocument(test_file)
     book_id = doc.root.get("id")
-    
+
     # Test creating a chapter
-    result = create_chapter.fn(test_file, book_id, "New Chapter", "A new chapter summary")
+    result = create_chapter.fn(
+        test_file, book_id, "New Chapter", "A new chapter summary"
+    )
     parsed = json.loads(result)
-    
+
     assert parsed["success"] is True
     assert "new_ids" in parsed
     assert len(parsed["new_ids"]) == 1
     assert "validation" in parsed
     assert parsed["validation"]["valid"] is True
-    
+
     # Verify chapter was created
     new_chapter_id = parsed["new_ids"][0]
     chapter = doc.get_element_by_id(new_chapter_id)
     assert chapter is not None
     assert chapter.tag == "chapter"
     assert chapter.get("title") == "New Chapter"
-    
+
     os.unlink(test_file)
 
 
@@ -473,27 +476,29 @@ def test_mcp_server_create_sequence():
     import tempfile
     import os
 
-    with tempfile.NamedTemporaryFile(suffix='.xml', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".xml", delete=False) as f:
         test_file = f.name
 
     # Create a basic document with a chapter
     create_document.fn(test_file, "Test Book")
     doc = HNPXDocument(test_file)
     book_id = doc.root.get("id")
-    
+
     # Create a chapter first
     chapter_result = create_chapter.fn(test_file, book_id, "Chapter 1", "First chapter")
     chapter_parsed = json.loads(chapter_result)
     chapter_id = chapter_parsed["new_ids"][0]
-    
+
     # Test creating a sequence
-    result = create_sequence.fn(test_file, chapter_id, "Forest", "In dark forest", time="night")
+    result = create_sequence.fn(
+        test_file, chapter_id, "Forest", "In dark forest", time="night"
+    )
     parsed = json.loads(result)
-    
+
     assert parsed["success"] is True
     assert "new_ids" in parsed
     assert len(parsed["new_ids"]) == 1
-    
+
     # Verify sequence was created
     new_sequence_id = parsed["new_ids"][0]
     sequence = doc.get_element_by_id(new_sequence_id)
@@ -501,85 +506,107 @@ def test_mcp_server_create_sequence():
     assert sequence.tag == "sequence"
     assert sequence.get("loc") == "Forest"
     assert sequence.get("time") == "night"
-    
+
     os.unlink(test_file)
 
 
 def test_mcp_server_create_beat():
     """Test MCP server create_beat functionality."""
     import json
-    from mcp_hnpx.server import create_beat, create_document, create_chapter, create_sequence
+    from mcp_hnpx.server import (
+        create_beat,
+        create_document,
+        create_chapter,
+        create_sequence,
+    )
     import tempfile
     import os
 
-    with tempfile.NamedTemporaryFile(suffix='.xml', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".xml", delete=False) as f:
         test_file = f.name
 
     # Create a basic document with chapter and sequence
     create_document.fn(test_file, "Test Book")
     doc = HNPXDocument(test_file)
     book_id = doc.root.get("id")
-    
+
     chapter_result = create_chapter.fn(test_file, book_id, "Chapter 1", "First chapter")
     chapter_parsed = json.loads(chapter_result)
     chapter_id = chapter_parsed["new_ids"][0]
-    
-    sequence_result = create_sequence.fn(test_file, chapter_id, "Forest", "In the dark forest")
+
+    sequence_result = create_sequence.fn(
+        test_file, chapter_id, "Forest", "In the dark forest"
+    )
     sequence_parsed = json.loads(sequence_result)
     sequence_id = sequence_parsed["new_ids"][0]
-    
+
     # Test creating a beat
     result = create_beat.fn(test_file, sequence_id, "The discovery")
     parsed = json.loads(result)
-    
+
     assert parsed["success"] is True
     assert "new_ids" in parsed
     assert len(parsed["new_ids"]) == 1
-    
+
     # Verify beat was created
     new_beat_id = parsed["new_ids"][0]
     beat = doc.get_element_by_id(new_beat_id)
     assert beat is not None
     assert beat.tag == "beat"
-    
+
     os.unlink(test_file)
 
 
 def test_mcp_server_create_paragraph():
     """Test MCP server create_paragraph functionality."""
     import json
-    from mcp_hnpx.server import create_paragraph, create_document, create_chapter, create_sequence, create_beat
+    from mcp_hnpx.server import (
+        create_paragraph,
+        create_document,
+        create_chapter,
+        create_sequence,
+        create_beat,
+    )
     import tempfile
     import os
 
-    with tempfile.NamedTemporaryFile(suffix='.xml', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".xml", delete=False) as f:
         test_file = f.name
 
     # Create a basic document with full hierarchy
     create_document.fn(test_file, "Test Book")
     doc = HNPXDocument(test_file)
     book_id = doc.root.get("id")
-    
+
     chapter_result = create_chapter.fn(test_file, book_id, "Chapter 1", "First chapter")
     chapter_parsed = json.loads(chapter_result)
     chapter_id = chapter_parsed["new_ids"][0]
-    
-    sequence_result = create_sequence.fn(test_file, chapter_id, "Forest", "In the dark forest")
+
+    sequence_result = create_sequence.fn(
+        test_file, chapter_id, "Forest", "In the dark forest"
+    )
     sequence_parsed = json.loads(sequence_result)
     sequence_id = sequence_parsed["new_ids"][0]
-    
+
     beat_result = create_beat.fn(test_file, sequence_id, "The discovery")
     beat_parsed = json.loads(beat_result)
     beat_id = beat_parsed["new_ids"][0]
-    
+
     # Test creating a paragraph
-    result = create_paragraph.fn(test_file, beat_id, "Character speaks", "Hello world!", mode="dialogue", char="hero")
+    result = create_paragraph.fn(
+        test_file,
+        beat_id,
+        "Character speaks",
+        "Hello world!",
+        mode="dialogue",
+        char="hero",
+    )
     parsed = json.loads(result)
-    
+
     assert parsed["success"] is True
     assert "new_ids" in parsed
     assert len(parsed["new_ids"]) == 1
-    
+
     # Verify paragraph was created
     new_paragraph_id = parsed["new_ids"][0]
     paragraph = doc.get_element_by_id(new_paragraph_id)
@@ -588,45 +615,56 @@ def test_mcp_server_create_paragraph():
     assert paragraph.get("mode") == "dialogue"
     assert paragraph.get("char") == "hero"
     assert paragraph.text == "Hello world!"
-    
+
     os.unlink(test_file)
 
 
 def test_mcp_server_get_node_path():
     """Test MCP server get_node_path functionality."""
     import json
-    from mcp_hnpx.server import get_node_path, create_document, create_chapter, create_sequence, create_beat, create_paragraph
+    from mcp_hnpx.server import (
+        get_node_path,
+        create_document,
+        create_chapter,
+        create_sequence,
+        create_beat,
+        create_paragraph,
+    )
     import tempfile
     import os
 
-    with tempfile.NamedTemporaryFile(suffix='.xml', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".xml", delete=False) as f:
         test_file = f.name
 
     # Create a document with nested structure
     create_document.fn(test_file, "Test Book")
     doc = HNPXDocument(test_file)
     book_id = doc.root.get("id")
-    
+
     chapter_result = create_chapter.fn(test_file, book_id, "Chapter 1", "First chapter")
     chapter_parsed = json.loads(chapter_result)
     chapter_id = chapter_parsed["new_ids"][0]
-    
-    sequence_result = create_sequence.fn(test_file, chapter_id, "Forest", "In the dark forest")
+
+    sequence_result = create_sequence.fn(
+        test_file, chapter_id, "Forest", "In the dark forest"
+    )
     sequence_parsed = json.loads(sequence_result)
     sequence_id = sequence_parsed["new_ids"][0]
-    
+
     beat_result = create_beat.fn(test_file, sequence_id, "The discovery")
     beat_parsed = json.loads(beat_result)
     beat_id = beat_parsed["new_ids"][0]
-    
-    paragraph_result = create_paragraph.fn(test_file, beat_id, "Character speaks", "Hello world!")
+
+    paragraph_result = create_paragraph.fn(
+        test_file, beat_id, "Character speaks", "Hello world!"
+    )
     paragraph_parsed = json.loads(paragraph_result)
     paragraph_id = paragraph_parsed["new_ids"][0]
-    
+
     # Test getting node path
     result = get_node_path.fn(test_file, paragraph_id)
     parsed = json.loads(result)
-    
+
     assert parsed["success"] is True
     assert "path" in parsed
     assert len(parsed["path"]) == 5  # book -> chapter -> sequence -> beat -> paragraph
@@ -635,7 +673,7 @@ def test_mcp_server_get_node_path():
     assert parsed["path"][2] == f"sequence[{sequence_id}]"
     assert parsed["path"][3] == f"beat[{beat_id}]"
     assert parsed["path"][4] == f"paragraph[{paragraph_id}]"
-    
+
     os.unlink(test_file)
 
 
@@ -646,89 +684,111 @@ def test_mcp_server_get_direct_children():
     import tempfile
     import os
 
-    with tempfile.NamedTemporaryFile(suffix='.xml', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".xml", delete=False) as f:
         test_file = f.name
 
     # Create a document with multiple chapters
     create_document.fn(test_file, "Test Book")
     doc = HNPXDocument(test_file)
     book_id = doc.root.get("id")
-    
+
     # Create multiple chapters
-    chapter1_result = create_chapter.fn(test_file, book_id, "Chapter 1", "First chapter")
-    chapter2_result = create_chapter.fn(test_file, book_id, "Chapter 2", "Second chapter")
-    
+    chapter1_result = create_chapter.fn(
+        test_file, book_id, "Chapter 1", "First chapter"
+    )
+    chapter2_result = create_chapter.fn(
+        test_file, book_id, "Chapter 2", "Second chapter"
+    )
+
     # Test getting direct children of book
     result = get_direct_children.fn(test_file, book_id)
     parsed = json.loads(result)
-    
+
     assert isinstance(parsed, list)
     assert len(parsed) == 3  # Original chapter + 2 new ones
-    
+
     # Check that all children are chapters
     for child in parsed:
         assert child["tag"] == "chapter"
         assert "id" in child
         assert "summary" in child
         assert "attributes" in child
-    
+
     os.unlink(test_file)
 
 
 def test_mcp_server_render_node():
     """Test MCP server render_node functionality."""
     import json
-    from mcp_hnpx.server import render_node, create_document, create_chapter, create_sequence, create_beat, create_paragraph
+    from mcp_hnpx.server import (
+        render_node,
+        create_document,
+        create_chapter,
+        create_sequence,
+        create_beat,
+        create_paragraph,
+    )
     import tempfile
     import os
 
-    with tempfile.NamedTemporaryFile(suffix='.xml', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".xml", delete=False) as f:
         test_file = f.name
 
     # Create a document with content
     create_document.fn(test_file, "Test Book")
     doc = HNPXDocument(test_file)
     book_id = doc.root.get("id")
-    
+
     chapter_result = create_chapter.fn(test_file, book_id, "Chapter 1", "First chapter")
     chapter_parsed = json.loads(chapter_result)
     chapter_id = chapter_parsed["new_ids"][0]
-    
-    sequence_result = create_sequence.fn(test_file, chapter_id, "Forest", "In the dark forest")
+
+    sequence_result = create_sequence.fn(
+        test_file, chapter_id, "Forest", "In the dark forest"
+    )
     sequence_parsed = json.loads(sequence_result)
     sequence_id = sequence_parsed["new_ids"][0]
-    
+
     beat_result = create_beat.fn(test_file, sequence_id, "The discovery")
     beat_parsed = json.loads(beat_result)
     beat_id = beat_parsed["new_ids"][0]
-    
-    paragraph_result = create_paragraph.fn(test_file, beat_id, "Character speaks", "Hello world!", mode="dialogue", char="hero")
+
+    paragraph_result = create_paragraph.fn(
+        test_file,
+        beat_id,
+        "Character speaks",
+        "Hello world!",
+        mode="dialogue",
+        char="hero",
+    )
     paragraph_parsed = json.loads(paragraph_result)
     paragraph_id = paragraph_parsed["new_ids"][0]
-    
+
     # Test rendering chapter
     result = render_node.fn(test_file, chapter_id)
     parsed = json.loads(result)
-    
+
     assert parsed["success"] is True
     assert "rendered" in parsed
     assert "node_id" in parsed
     assert parsed["node_id"] == chapter_id
-    
+
     rendered = parsed["rendered"]
     assert isinstance(rendered, str)
     assert len(rendered) > 0
     assert f"[{chapter_id}]" in rendered  # ID should be included
     assert "Chapter 1" in rendered  # Title should be included
     assert "First chapter" in rendered  # Summary should be included
-    
+
     # Test rendering with summaries disabled
     result_no_summaries = render_node.fn(test_file, chapter_id, include_summaries=False)
     parsed_no_summaries = json.loads(result_no_summaries)
     assert parsed_no_summaries["success"] is True
     rendered_no_summaries = parsed_no_summaries["rendered"]
-    assert "First chapter" not in rendered_no_summaries  # Summary should not be included
-    
+    assert (
+        "First chapter" not in rendered_no_summaries
+    )  # Summary should not be included
+
     os.unlink(test_file)
 
 
@@ -739,46 +799,52 @@ def test_mcp_server_reorder_children():
     import tempfile
     import os
 
-    with tempfile.NamedTemporaryFile(suffix='.xml', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".xml", delete=False) as f:
         test_file = f.name
 
     # Create a document with multiple chapters
     create_document.fn(test_file, "Test Book")
     doc = HNPXDocument(test_file)
     book_id = doc.root.get("id")
-    
+
     # Create multiple chapters
-    chapter1_result = create_chapter.fn(test_file, book_id, "Chapter A", "First chapter")
-    chapter2_result = create_chapter.fn(test_file, book_id, "Chapter B", "Second chapter")
-    chapter3_result = create_chapter.fn(test_file, book_id, "Chapter C", "Third chapter")
-    
+    chapter1_result = create_chapter.fn(
+        test_file, book_id, "Chapter A", "First chapter"
+    )
+    chapter2_result = create_chapter.fn(
+        test_file, book_id, "Chapter B", "Second chapter"
+    )
+    chapter3_result = create_chapter.fn(
+        test_file, book_id, "Chapter C", "Third chapter"
+    )
+
     # Get the chapter IDs
     chapter1_parsed = json.loads(chapter1_result)
     chapter2_parsed = json.loads(chapter2_result)
     chapter3_parsed = json.loads(chapter3_result)
-    
+
     chapter1_id = chapter1_parsed["new_ids"][0]
     chapter2_id = chapter2_parsed["new_ids"][0]
     chapter3_id = chapter3_parsed["new_ids"][0]
-    
+
     # Get current order
     children_before = doc.get_children(doc.root)
     original_order = [child.get("id") for child in children_before]
-    
+
     # Test reordering children
     new_order = [chapter3_id, chapter1_id, chapter2_id]  # Reverse order
     result = reorder_children.fn(test_file, book_id, new_order)
     parsed = json.loads(result)
-    
+
     assert parsed["success"] is True
     assert "validation" in parsed
     assert parsed["validation"]["valid"] is True
-    
+
     # Verify new order
     children_after = doc.get_children(doc.root)
     new_order_result = [child.get("id") for child in children_after]
     assert new_order_result == new_order
-    
+
     os.unlink(test_file)
 
 
@@ -789,22 +855,24 @@ def test_mcp_server_invalid_parent_child_relationship():
     import tempfile
     import os
 
-    with tempfile.NamedTemporaryFile(suffix='.xml', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".xml", delete=False) as f:
         test_file = f.name
 
     # Create a basic document
     create_document.fn(test_file, "Test Book")
     doc = HNPXDocument(test_file)
     book_id = doc.root.get("id")
-    
+
     # Try to create a paragraph under a book (should fail)
-    result = create_paragraph.fn(test_file, book_id, "Invalid paragraph", "This should fail")
+    result = create_paragraph.fn(
+        test_file, book_id, "Invalid paragraph", "This should fail"
+    )
     parsed = json.loads(result)
-    
+
     assert parsed["success"] is False
     assert "error" in parsed
     assert "can only be created under beat elements" in parsed["error"]
-    
+
     os.unlink(test_file)
 
 
@@ -815,32 +883,38 @@ def test_mcp_server_attribute_validation():
     import tempfile
     import os
 
-    with tempfile.NamedTemporaryFile(suffix='.xml', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".xml", delete=False) as f:
         test_file = f.name
 
     # Create a basic document with a chapter
     create_document.fn(test_file, "Test Book")
     doc = HNPXDocument(test_file)
     book_id = doc.root.get("id")
-    
+
     chapter_result = create_chapter.fn(test_file, book_id, "Chapter 1", "First chapter")
     chapter_parsed = json.loads(chapter_result)
     chapter_id = chapter_parsed["new_ids"][0]
-    
+
     # Test valid attribute edit
-    valid_result = edit_node_attributes.fn(test_file, chapter_id, {"title": "Updated Title"})
+    valid_result = edit_node_attributes.fn(
+        test_file, chapter_id, {"title": "Updated Title"}
+    )
     valid_parsed = json.loads(valid_result)
     assert valid_parsed["success"] is True
-    
+
     # Test invalid attribute edit
-    invalid_result = edit_node_attributes.fn(test_file, chapter_id, {"invalid_attr": "value"})
+    invalid_result = edit_node_attributes.fn(
+        test_file, chapter_id, {"invalid_attr": "value"}
+    )
     invalid_parsed = json.loads(invalid_result)
     assert invalid_parsed["success"] is False
     assert "Invalid attribute" in invalid_parsed["error"]
-    
+
     # Test invalid enum value
-    invalid_enum_result = edit_node_attributes.fn(test_file, chapter_id, {"pov": "invalid_pov"})
+    invalid_enum_result = edit_node_attributes.fn(
+        test_file, chapter_id, {"pov": "invalid_pov"}
+    )
     invalid_enum_parsed = json.loads(invalid_enum_result)
     assert invalid_enum_parsed["success"] is False
-    
+
     os.unlink(test_file)
