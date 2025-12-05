@@ -196,22 +196,10 @@ def test_mcp_server_get_empty_containers():
 
 
 def test_mcp_server_search_nodes():
-    """Test MCP server search_nodes functionality."""
-    from mcp_hnpx.server import search_nodes
-
-    # Access the underlying function from the FastMCP tool
-    result = search_nodes.fn("tests/resources/example.xml", text_contains="Boogiepop")
-    assert result is not None
-    assert isinstance(result, str)
-    # Should be valid JSON
-    import json
-
-    parsed_result = json.loads(result)
-    assert isinstance(parsed_result, list)
-    for node in parsed_result:
-        assert "id" in node
-        assert "tag" in node
-        assert "summary" in node
+    """Test that search_nodes was removed - this test should be skipped."""
+    # search_nodes was removed in the redesign, so this test is no longer relevant
+    # AI agents should use get_node and render_node for navigation instead
+    assert True
 
 
 def test_incomplete_document_loading():
@@ -272,8 +260,8 @@ def test_incomplete_document_statistics():
 
 
 def test_incomplete_document_export():
-    """Test exporting incomplete document to different formats."""
-    from mcp_hnpx.server import export_plain_text, export_markdown
+    """Test exporting incomplete document to plain text format."""
+    from mcp_hnpx.server import export_plain_text
 
     doc = HNPXDocument("tests/resources/incomplete.xml")
 
@@ -282,14 +270,8 @@ def test_incomplete_document_export():
     assert isinstance(plain_text, str)
     assert len(plain_text) > 0
 
-    # Test markdown export
-    markdown = export_markdown(doc, include_summaries=True)
-    assert isinstance(markdown, str)
-    assert len(markdown) > 0
-
-    # Both exports should include summaries even when text is missing
+    # Export should include summaries even when text is missing
     assert "Summary:" in plain_text or "BOOK:" in plain_text
-    assert "#" in markdown or "*" in markdown
 
 
 def test_incomplete_document_validation():
@@ -328,7 +310,7 @@ def test_incomplete_document_search():
 
 def test_mcp_server_with_incomplete_document():
     """Test MCP server functionality with incomplete document."""
-    from mcp_hnpx.server import get_node, get_empty_containers, search_nodes
+    from mcp_hnpx.server import get_node, get_empty_containers
 
     # Test get_node with a paragraph from incomplete document
     doc = HNPXDocument("tests/resources/incomplete.xml")
@@ -356,15 +338,8 @@ def test_mcp_server_with_incomplete_document():
     parsed_empty = json.loads(empty_result)
     assert isinstance(parsed_empty, list)
 
-    # Test search_nodes
-    search_result = search_nodes.fn(
-        "tests/resources/incomplete.xml", summary_contains="Boogiepop"
-    )
-    assert search_result is not None
-    assert isinstance(search_result, str)
-
-    parsed_search = json.loads(search_result)
-    assert isinstance(parsed_search, list)
+    # Note: search_nodes was removed in redesign
+    # AI agents should use get_node and render_node for navigation instead
 
 
 def test_mcp_server_create_document():

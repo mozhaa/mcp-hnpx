@@ -4,7 +4,7 @@ MCP Server for HNPX document manipulation.
 
 import json
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List
 
 from lxml import etree
 from fastmcp import FastMCP
@@ -104,85 +104,79 @@ def get_node_context(file_path: str, node_id: str, include_text: bool = False) -
 
 
 @mcp.tool()
-def set_node_children(file_path: str, node_id: str, children_xml: str) -> str:
-    """Replace a node's entire children list."""
-    doc = get_document(file_path)
-
-    try:
-        # Parse the children XML
-        parser = etree.XMLParser(remove_blank_text=True)
-        children_fragment = etree.fromstring(f"<root>{children_xml}</root>", parser)
-        new_children = list(children_fragment)
-
-        # Always generate random IDs for all new elements, overriding any existing IDs
-        for child in new_children:
-            child.set("id", generate_id())
-            # Recursively assign random IDs to all nested elements
-            for descendant in child.xpath(".//*[@id]"):
-                descendant.set("id", generate_id())
-
-        success = doc.set_node_children(node_id, new_children)
-
-        if success:
-            return f"Successfully updated children for node '{node_id}'"
-        else:
-            return f"Failed to update children for node '{node_id}'"
-    except etree.XMLSyntaxError as e:
-        return f"Invalid XML in children: {e}"
-
-
-@mcp.tool()
-def append_node_children(file_path: str, node_id: str, children_xml: str) -> str:
-    """Append children to a node's existing children list."""
-    doc = get_document(file_path)
-
-    try:
-        # Parse the children XML
-        parser = etree.XMLParser(remove_blank_text=True)
-        children_fragment = etree.fromstring(f"<root>{children_xml}</root>", parser)
-        new_children = list(children_fragment)
-
-        # Always generate random IDs for all new elements, overriding any existing IDs
-        for child in new_children:
-            child.set("id", generate_id())
-            # Recursively assign random IDs to all nested elements
-            for descendant in child.xpath(".//*[@id]"):
-                descendant.set("id", generate_id())
-
-        success = doc.append_children(node_id, new_children)
-
-        if success:
-            return f"Successfully appended children to node '{node_id}'"
-        else:
-            return f"Failed to append children to node '{node_id}'"
-    except etree.XMLSyntaxError as e:
-        return f"Invalid XML in children: {e}"
-
-
-@mcp.tool()
 def remove_node(file_path: str, node_id: str) -> str:
     """Remove a node by ID."""
     doc = get_document(file_path)
+    element = doc.get_element_by_id(node_id)
+    
+    if element is None:
+        return json.dumps({
+            "success": False,
+            "error": f"Node with ID '{node_id}' not found"
+        })
+    
+    # Cannot remove root element
+    if element.tag == "book":
+        return json.dumps({
+            "success": False,
+            "error": "Cannot remove the root book element"
+        })
+    
     success = doc.remove_element(node_id)
-
+    
     if success:
-        return f"Successfully removed node '{node_id}'"
+        # Auto-validate and auto-save
+        is_valid, errors = doc.validate()
+        doc.save()
+        
+        return json.dumps({
+            "success": True,
+            "validation": {"valid": is_valid, "errors": errors},
+            "message": f"Successfully removed node '{node_id}'"
+        })
     else:
-        return f"Failed to remove node '{node_id}'"
+        return json.dumps({
+            "success": False,
+            "error": f"Failed to remove node '{node_id}'"
+        })
 
 
 @mcp.tool()
 def edit_node_attributes(
     file_path: str, node_id: str, attributes: Dict[str, str]
 ) -> str:
-    """Edit node attributes."""
+    """Edit node attributes with validation."""
     doc = get_document(file_path)
-    success = doc.edit_element_attributes(node_id, attributes)
-
-    if success:
-        return f"Successfully updated attributes for node '{node_id}'"
-    else:
-        return f"Failed to update attributes for node '{node_id}'"
+    element = doc.get_element_by_id(node_id)
+    
+    if element is None:
+        return json.dumps({
+            "success": False,
+            "error": f"Node with ID '{node_id}' not found"
+        })
+    
+    # Validate attributes
+    is_valid_attrs, attr_errors = doc.validate_attributes(element.tag, attributes)
+    
+    if not is_valid_attrs:
+        return json.dumps({
+            "success": False,
+            "error": f"Invalid attributes: {'; '.join(attr_errors)}"
+        })
+    
+    # Apply changes
+    for attr_name, attr_value in attributes.items():
+        element.set(attr_name, attr_value)
+    
+    # Auto-validate and auto-save
+    is_valid, errors = doc.validate()
+    doc.save()
+    
+    return json.dumps({
+        "success": True,
+        "validation": {"valid": is_valid, "errors": errors},
+        "message": f"Successfully updated attributes for node '{node_id}'"
+    })
 
 
 @mcp.tool()
@@ -205,43 +199,6 @@ def get_empty_containers(file_path: str, limit: int = 10) -> str:
 
 
 @mcp.tool()
-def search_nodes(
-    file_path: str,
-    tag: str = None,
-    attributes: Dict[str, str] = None,
-    text_contains: str = None,
-    summary_contains: str = None,
-) -> str:
-    """Search for nodes matching criteria."""
-    doc = get_document(file_path)
-    results = doc.search_elements(tag, attributes, text_contains, summary_contains)
-
-    result_data = []
-    for element in results:
-        element_data = {
-            "id": element.get("id"),
-            "tag": element.tag,
-            "summary": doc.get_element_summary(element),
-            "attributes": doc.get_element_attributes(element),
-        }
-        if element.tag == "paragraph":
-            element_data["text"] = doc.get_element_text(element)
-        result_data.append(element_data)
-
-    return json.dumps(result_data, indent=2)
-
-
-@mcp.tool()
-def validate_document(file_path: str) -> str:
-    """Validate HNPX document against schema."""
-    doc = get_document(file_path)
-    is_valid, errors = doc.validate()
-
-    result = {"valid": is_valid, "errors": errors}
-    return json.dumps(result, indent=2)
-
-
-@mcp.tool()
 def get_document_stats(file_path: str) -> str:
     """Get statistics about the HNPX document."""
     doc = get_document(file_path)
@@ -250,16 +207,10 @@ def get_document_stats(file_path: str) -> str:
 
 
 @mcp.tool()
-def export_document(file_path: str, format: str, include_summaries: bool = True) -> str:
-    """Export HNPX document to other formats."""
+def export_document(file_path: str, include_summaries: bool = True) -> str:
+    """Export HNPX document to plain text format."""
     doc = get_document(file_path)
-
-    if format == "plain":
-        return export_plain_text(doc, include_summaries)
-    elif format == "markdown":
-        return export_markdown(doc, include_summaries)
-    else:
-        return f"Unsupported export format: {format}"
+    return export_plain_text(doc, include_summaries)
 
 
 def export_plain_text(doc: HNPXDocument, include_summaries: bool) -> str:
@@ -318,86 +269,6 @@ def export_plain_text(doc: HNPXDocument, include_summaries: bool) -> str:
     return "\n".join(lines)
 
 
-def export_markdown(doc: HNPXDocument, include_summaries: bool) -> str:
-    """Export document as Markdown."""
-    lines = []
-
-    # Add book summary
-    if include_summaries:
-        book_summary = doc.get_element_summary(doc.root)
-        if book_summary:
-            lines.append(f"# {book_summary}")
-            lines.append("")
-
-    # Process chapters
-    for chapter in doc.root.xpath("chapter"):
-        chapter_title = chapter.get("title", "Untitled Chapter")
-        lines.append(f"## {chapter_title}")
-
-        if include_summaries:
-            chapter_summary = doc.get_element_summary(chapter)
-            if chapter_summary:
-                lines.append(f"*{chapter_summary}*")
-            lines.append("")
-
-        # Process sequences
-        for sequence in chapter.xpath("sequence"):
-            sequence_loc = sequence.get("loc", "Unknown Location")
-            lines.append(f"### {sequence_loc}")
-
-            if include_summaries:
-                sequence_summary = doc.get_element_summary(sequence)
-                if sequence_summary:
-                    lines.append(f"*{sequence_summary}*")
-                lines.append("")
-
-            # Process beats
-            for beat in sequence.xpath("beat"):
-                if include_summaries:
-                    beat_summary = doc.get_element_summary(beat)
-                    if beat_summary:
-                        lines.append(f"**{beat_summary}**")
-
-                # Process paragraphs
-                for paragraph in beat.xpath("paragraph"):
-                    text = doc.get_element_text(paragraph)
-                    mode = paragraph.get("mode", "narration")
-                    char = paragraph.get("char")
-
-                    if mode == "dialogue":
-                        lines.append(f"> **{char}**: {text}")
-                    elif mode == "internal":
-                        lines.append(f"*{char} (thoughts): {text}*")
-                    else:
-                        lines.append(text)
-
-                if include_summaries and beat_summary:
-                    lines.append("")
-
-            if include_summaries:
-                lines.append("")
-
-        if include_summaries:
-            lines.append("")
-
-    return "\n".join(lines)
-
-
-@mcp.tool()
-def save_document(file_path: str, output_path: str = None) -> str:
-    """Save changes to the HNPX document."""
-    if output_path is None:
-        output_path = file_path
-
-    doc = get_document(file_path)
-    success = doc.save(output_path)
-
-    if success:
-        return f"Successfully saved document to '{output_path}'"
-    else:
-        return f"Failed to save document to '{output_path}'"
-
-
 @mcp.tool()
 def create_document(file_path: str, title: str = "Untitled Book") -> str:
     """Create a new empty HNPX document with basic structure."""
@@ -444,6 +315,286 @@ def create_document(file_path: str, title: str = "Untitled Book") -> str:
 
     except Exception as e:
         return f"Failed to create HNPX document: {str(e)}"
+
+
+# ===== NEW CREATION TOOLS =====
+
+@mcp.tool()
+def create_chapter(file_path: str, parent_id: str, title: str, summary: str, pov: str = None) -> str:
+    """Create a new chapter element."""
+    doc = get_document(file_path)
+    
+    # Validate parent exists and is a book
+    parent = doc.get_element_by_id(parent_id)
+    if parent is None:
+        return json.dumps({
+            "success": False,
+            "error": f"Parent node with ID '{parent_id}' not found"
+        })
+    
+    if parent.tag != "book":
+        return json.dumps({
+            "success": False,
+            "error": f"Chapters can only be created under book elements, not '{parent.tag}'"
+        })
+    
+    # Create attributes
+    attributes = {"title": title}
+    if pov:
+        attributes["pov"] = pov
+    
+    # Create the chapter
+    new_id = doc.create_child_element(parent_id, "chapter", summary, **attributes)
+    
+    if new_id:
+        # Auto-validate
+        is_valid, errors = doc.validate()
+        return json.dumps({
+            "success": True,
+            "validation": {"valid": is_valid, "errors": errors},
+            "new_ids": [new_id],
+            "message": f"Successfully created chapter '{title}' with ID '{new_id}'"
+        })
+    else:
+        return json.dumps({
+            "success": False,
+            "error": "Failed to create chapter"
+        })
+
+
+@mcp.tool()
+def create_sequence(file_path: str, parent_id: str, location: str, summary: str, time: str = None, pov: str = None) -> str:
+    """Create a new sequence element."""
+    doc = get_document(file_path)
+    
+    # Validate parent exists and is a chapter
+    parent = doc.get_element_by_id(parent_id)
+    if parent is None:
+        return json.dumps({
+            "success": False,
+            "error": f"Parent node with ID '{parent_id}' not found"
+        })
+    
+    if parent.tag != "chapter":
+        return json.dumps({
+            "success": False,
+            "error": f"Sequences can only be created under chapter elements, not '{parent.tag}'"
+        })
+    
+    # Create attributes
+    attributes = {"loc": location}
+    if time:
+        attributes["time"] = time
+    if pov:
+        attributes["pov"] = pov
+    
+    # Create the sequence
+    new_id = doc.create_child_element(parent_id, "sequence", summary, **attributes)
+    
+    if new_id:
+        # Auto-validate
+        is_valid, errors = doc.validate()
+        return json.dumps({
+            "success": True,
+            "validation": {"valid": is_valid, "errors": errors},
+            "new_ids": [new_id],
+            "message": f"Successfully created sequence at '{location}' with ID '{new_id}'"
+        })
+    else:
+        return json.dumps({
+            "success": False,
+            "error": "Failed to create sequence"
+        })
+
+
+@mcp.tool()
+def create_beat(file_path: str, parent_id: str, summary: str) -> str:
+    """Create a new beat element."""
+    doc = get_document(file_path)
+    
+    # Validate parent exists and is a sequence
+    parent = doc.get_element_by_id(parent_id)
+    if parent is None:
+        return json.dumps({
+            "success": False,
+            "error": f"Parent node with ID '{parent_id}' not found"
+        })
+    
+    if parent.tag != "sequence":
+        return json.dumps({
+            "success": False,
+            "error": f"Beats can only be created under sequence elements, not '{parent.tag}'"
+        })
+    
+    # Create the beat
+    new_id = doc.create_child_element(parent_id, "beat", summary)
+    
+    if new_id:
+        # Auto-validate
+        is_valid, errors = doc.validate()
+        return json.dumps({
+            "success": True,
+            "validation": {"valid": is_valid, "errors": errors},
+            "new_ids": [new_id],
+            "message": f"Successfully created beat with ID '{new_id}'"
+        })
+    else:
+        return json.dumps({
+            "success": False,
+            "error": "Failed to create beat"
+        })
+
+
+@mcp.tool()
+def create_paragraph(file_path: str, parent_id: str, summary: str, text: str, mode: str = "narration", char: str = None) -> str:
+    """Create a new paragraph element."""
+    doc = get_document(file_path)
+    
+    # Validate parent exists and is a beat
+    parent = doc.get_element_by_id(parent_id)
+    if parent is None:
+        return json.dumps({
+            "success": False,
+            "error": f"Parent node with ID '{parent_id}' not found"
+        })
+    
+    if parent.tag != "beat":
+        return json.dumps({
+            "success": False,
+            "error": f"Paragraphs can only be created under beat elements, not '{parent.tag}'"
+        })
+    
+    # Create attributes
+    attributes = {"mode": mode}
+    if char:
+        attributes["char"] = char
+    
+    # Create the paragraph
+    new_id = doc.create_child_element(parent_id, "paragraph", summary, **attributes)
+    
+    if new_id:
+        # Set the text content
+        paragraph = doc.get_element_by_id(new_id)
+        if paragraph is not None:
+            paragraph.text = text
+            
+            # Auto-validate and save
+            is_valid, errors = doc.validate()
+            doc.save()
+            
+            return json.dumps({
+                "success": True,
+                "validation": {"valid": is_valid, "errors": errors},
+                "new_ids": [new_id],
+                "message": f"Successfully created paragraph with ID '{new_id}'"
+            })
+    
+    return json.dumps({
+        "success": False,
+        "error": "Failed to create paragraph"
+    })
+
+
+# ===== NEW NAVIGATION TOOLS =====
+
+@mcp.tool()
+def get_node_path(file_path: str, node_id: str) -> str:
+    """Get the full path from root to the specified node."""
+    doc = get_document(file_path)
+    path = doc.get_node_path(node_id)
+    
+    if not path:
+        return json.dumps({
+            "success": False,
+            "error": f"Node with ID '{node_id}' not found"
+        })
+    
+    return json.dumps({
+        "success": True,
+        "path": path,
+        "node_id": node_id
+    })
+
+
+@mcp.tool()
+def get_direct_children(file_path: str, node_id: str) -> str:
+    """Get immediate children of a node (excluding summary elements)."""
+    doc = get_document(file_path)
+    element = doc.get_element_by_id(node_id)
+    
+    if element is None:
+        return json.dumps({
+            "success": False,
+            "error": f"Node with ID '{node_id}' not found"
+        })
+    
+    children = doc.get_children(element)
+    result = []
+    
+    for child in children:
+        child_data = {
+            "id": child.get("id"),
+            "tag": child.tag,
+            "summary": doc.get_element_summary(child),
+            "attributes": doc.get_element_attributes(child),
+        }
+        if child.tag == "paragraph":
+            child_data["text"] = doc.get_element_text(child)
+        result.append(child_data)
+    
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+def render_node(file_path: str, node_id: str, include_summaries: bool = True) -> str:
+    """Render a node and its children as markdown with ID prefixes."""
+    doc = get_document(file_path)
+    rendered = doc.render_node_with_ids(node_id, include_summaries)
+    
+    if rendered.startswith(f"Element '{node_id}' not found"):
+        return json.dumps({
+            "success": False,
+            "error": f"Node with ID '{node_id}' not found"
+        })
+    
+    return json.dumps({
+        "success": True,
+        "rendered": rendered,
+        "node_id": node_id
+    })
+
+
+# ===== NEW MANAGEMENT TOOLS =====
+
+@mcp.tool()
+def reorder_children(file_path: str, parent_id: str, child_ids: list) -> str:
+    """Reorder children of an element based on provided ID list."""
+    doc = get_document(file_path)
+    
+    # Validate parent exists
+    parent = doc.get_element_by_id(parent_id)
+    if parent is None:
+        return json.dumps({
+            "success": False,
+            "error": f"Parent node with ID '{parent_id}' not found"
+        })
+    
+    # Attempt to reorder
+    success = doc.reorder_children(parent_id, child_ids)
+    
+    if success:
+        # Auto-validate
+        is_valid, errors = doc.validate()
+        return json.dumps({
+            "success": True,
+            "validation": {"valid": is_valid, "errors": errors},
+            "message": f"Successfully reordered children of node '{parent_id}'"
+        })
+    else:
+        return json.dumps({
+            "success": False,
+            "error": "Failed to reorder children. Check that all child IDs are valid."
+        })
 
 
 if __name__ == "__main__":
