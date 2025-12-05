@@ -84,7 +84,8 @@ def generate_unique_id(existing_ids: set) -> str:
 
 def find_node(tree: etree.ElementTree, node_id: str) -> Optional[etree.Element]:
     """Find node by ID, return None if not found"""
-    return tree.find(f".//*[@id='{node_id}']")
+    nodes = tree.xpath(f"//*[@id='{node_id}']")
+    return nodes[0] if nodes else None
 
 def get_child_count(node: etree.Element) -> int:
     """Get count of children excluding summary"""
