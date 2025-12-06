@@ -182,7 +182,7 @@ You have access to exactly two tools in this mode, which you must use step-by-st
 
 **Parameters:**
 - `question`: (required) A clear, specific question addressing the creative decision needed
-- `follow_up`: (required) A list of 2-4 suggested answers, each in its own `<suggest>` tag
+- `follow_up`: (required) A list of 2-6 suggested answers, each in its own `<suggest>` tag
 
 **Usage:**
 ```
