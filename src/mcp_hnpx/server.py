@@ -29,7 +29,7 @@ app.tool()(tools.remove_node)
 app.tool()(tools.reorder_children)
 app.tool()(tools.edit_summary)
 app.tool()(tools.edit_paragraph_text)
-app.tool()(tools.move_node)
+app.tool()(tools.move_nodes)
 app.tool()(tools.remove_node_children)
 
 # Rendering & Export Tools

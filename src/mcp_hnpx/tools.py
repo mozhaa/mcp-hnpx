@@ -6,12 +6,12 @@ from lxml import etree
 
 from . import hnpx
 from .exceptions import (
-    NodeNotFoundError,
     InvalidAttributeError,
     InvalidHierarchyError,
-    MissingAttributeError,
-    InvalidParentError,
     InvalidOperationError,
+    InvalidParentError,
+    MissingAttributeError,
+    NodeNotFoundError,
 )
 
 
@@ -546,84 +546,51 @@ def edit_paragraph_text(file_path: str, paragraph_id: str, new_text: str) -> str
     return f"Updated text content for paragraph {paragraph_id}"
 
 
-def move_node(
-    file_path: str, node_id: str, new_parent_id: str, position: Optional[int] = None
-) -> str:
-    """Move nodes between parents
+def move_nodes(file_path: str, node_ids: list, new_parent_id: str) -> str:
+    """Move multiple nodes between parents
 
     Args:
         file_path (str): Path to the HNPX document
-        node_id (str): ID of the node to move
+        node_ids (list): List of node IDs to move
         new_parent_id (str): ID of the new parent node
-        position (Optional[int]): Position index in the new parent's children (0-based)
     """
     tree = hnpx.parse_document(file_path)
-    node = hnpx.find_node(tree, node_id)
     new_parent = hnpx.find_node(tree, new_parent_id)
-
-    if node is None:
-        raise NodeNotFoundError(node_id)
 
     if new_parent is None:
         raise NodeNotFoundError(new_parent_id)
 
-    # Check if trying to move root
-    if node.tag == "book":
-        raise InvalidOperationError("move_node", "Cannot move book element")
-
-    # Check hierarchy validity
+    # Check hierarchy validity for new parent
     valid_hierarchy = {
         "book": ["chapter"],
         "chapter": ["sequence"],
         "sequence": ["beat"],
         "beat": ["paragraph"],
+        "paragraph": [],
     }
 
-    if (
-        new_parent.tag not in valid_hierarchy
-        or node.tag not in valid_hierarchy[new_parent.tag]
-    ):
-        raise InvalidHierarchyError(new_parent.tag, node.tag)
+    nodes_moved = 0
+    for node_id in node_ids:
+        node = hnpx.find_node(tree, node_id)
+        if node is None:
+            raise NodeNotFoundError(node_id)
 
-    # Check if trying to move a node to its own descendant
-    current = new_parent
-    while current is not None:
-        if current == node:
-            raise InvalidOperationError(
-                "move_node", "Cannot move a node to its own descendant"
-            )
-        current = current.getparent()
+        # Check if trying to move root
+        if node.tag == "book":
+            raise InvalidOperationError("move_nodes", "Cannot move book element")
 
-    # Get old parent
-    old_parent = node.getparent()
+        # Check hierarchy validity
+        if node.tag not in valid_hierarchy[new_parent.tag]:
+            raise InvalidHierarchyError(new_parent.tag, node.tag)
 
-    # Remove from old parent
-    old_parent.remove(node)
-
-    # Add to new parent
-    if position is None:
-        # Append to the end
+        old_parent = node.getparent()
+        old_parent.remove(node)
         new_parent.append(node)
-    else:
-        # Insert at specific position
-        # Get current children (excluding summary)
-        children = [child for child in new_parent if child.tag != "summary"]
-
-        if position < 0 or position > len(children):
-            raise InvalidOperationError(
-                "move_node", f"Position {position} out of range (0-{len(children)})"
-            )
-
-        if position == len(children):
-            new_parent.append(node)
-        else:
-            new_parent.insert(
-                position + (1 if new_parent[0].tag == "summary" else 0), node
-            )
+        nodes_moved += 1
 
     hnpx.save_document(tree, file_path)
 
-    return f"Moved node {node_id} to parent {new_parent_id}"
+    return f"Moved {nodes_moved} nodes to parent {new_parent_id}"
 
 
 def remove_node_children(file_path: str, node_id: str) -> str:

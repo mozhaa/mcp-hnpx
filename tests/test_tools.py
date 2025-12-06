@@ -1,11 +1,12 @@
 import pytest
+
 import mcp_hnpx.tools as tools
 from mcp_hnpx.exceptions import (
-    NodeNotFoundError,
     InvalidAttributeError,
     InvalidHierarchyError,
-    MissingAttributeError,
     InvalidOperationError,
+    MissingAttributeError,
+    NodeNotFoundError,
 )
 
 
@@ -319,11 +320,11 @@ def test_edit_paragraph_text_not_paragraph(complete_xml_path, temp_file):
         tools.edit_paragraph_text(temp_file, "3295p0", "New text")
 
 
-def test_move_node(complete_xml_path, temp_file):
+def test_move_nodes_single(complete_xml_path, temp_file):
     with open(temp_file, "w") as f:
         f.write(open(complete_xml_path).read())
 
-    tools.move_node(temp_file, "gr5peb", "104lac", 0)
+    tools.move_nodes(temp_file, ["gr5peb"], "104lac")
 
     tree = tools.hnpx.parse_document(temp_file)
     beat = tools.hnpx.find_node(tree, "gr5peb")
@@ -331,20 +332,37 @@ def test_move_node(complete_xml_path, temp_file):
     assert parent.get("id") == "104lac"
 
 
-def test_move_node_not_found(complete_xml_path, temp_file):
+def test_move_nodes_multiple(mixed_xml_path, temp_file):
+    with open(temp_file, "w") as f:
+        f.write(open(mixed_xml_path).read())
+
+    child_ids = ["76w5gp", "9zgowk"]
+    tools.move_nodes(temp_file, child_ids, "en92qn")
+
+    new_tree = tools.hnpx.parse_document(temp_file)
+    parent2 = tools.hnpx.find_node(new_tree, "en92qn")
+    children2 = [child.get("id") for child in parent2 if child.tag != "summary"]
+    assert children2 == ["ybqiqe", "tmwumx"] + child_ids
+
+    parent1 = tools.hnpx.find_node(new_tree, "wyxbo0")
+    children1 = [child.get("id") for child in parent1 if child.tag != "summary"]
+    assert children1 == ["zexcv5"]
+
+
+def test_move_nodes_not_found(complete_xml_path, temp_file):
     with open(temp_file, "w") as f:
         f.write(open(complete_xml_path).read())
 
     with pytest.raises(NodeNotFoundError):
-        tools.move_node(temp_file, "nonexistent", "104lac", 0)
+        tools.move_nodes(temp_file, ["nonexistent"], "104lac")
 
 
-def test_move_node_invalid_hierarchy(complete_xml_path, temp_file):
+def test_move_nodes_invalid_hierarchy(complete_xml_path, temp_file):
     with open(temp_file, "w") as f:
         f.write(open(complete_xml_path).read())
 
     with pytest.raises(InvalidHierarchyError):
-        tools.move_node(temp_file, "uvxuqh", "glyjor", 0)
+        tools.move_nodes(temp_file, ["uvxuqh"], "glyjor")
 
 
 def test_remove_node_children(complete_xml_path, temp_file):
