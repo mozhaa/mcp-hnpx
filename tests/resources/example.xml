@@ -5,7 +5,7 @@
   <chapter id="c8p2q5" title="Boogiepop" pov="suema">
     <summary>Students discuss the Boogiepop legend, and one claims to see the mysterious figure on the school roof.</summary>
     
-    <sequence id="s4r7t9" loc="School cafeteria" time="lunch" pov="suema">
+    <sequence id="s4r7t9" location="School cafeteria" time="lunch" pov="suema">
       <summary>Lunch conversation about the Boogiepop legend and rumors about Kirima Nagi.</summary>
       
       <beat id="b1v6x3">

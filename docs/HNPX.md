@@ -63,7 +63,7 @@ Major narrative division with a title.
 ```xml
 <chapter id="k9p3q1" title="The Awakening" pov="mira">
   <summary>A young mage discovers her powers in the forbidden woods.</summary>
-  <sequence id="r4s8t6" loc="Forest">
+  <sequence id="r4s8t6" location="Forest">
     <!-- ... -->
   </sequence>
 </chapter>
@@ -76,7 +76,7 @@ Continuous narrative in a single location and time frame.
 
 **Attributes:**
 - `id` (required): Unique identifier
-- `loc` (required): Location description
+- `location` (required): Location description
 - `time` (optional): Time indicator (e.g., "night", "next day", "flashback")
 - `pov` (optional): Overrides chapter POV if present
 
@@ -88,7 +88,7 @@ Continuous narrative in a single location and time frame.
 
 **Example:**
 ```xml
-<sequence id="r4s8t6" loc="Forest" time="night" pov="mira">
+<sequence id="r4s8t6" location="Forest" time="night" pov="mira">
   <summary>Mira discovers an ancient shrine.</summary>
   <beat id="u1v7w3">
     <!-- ... -->
@@ -223,7 +223,7 @@ A valid HNPX document must:
   <chapter id="k9p3q1" title="The Awakening" pov="mira">
     <summary>A young mage discovers her powers in the forbidden woods.</summary>
     
-    <sequence id="r4s8t6" loc="Forest" time="night">
+    <sequence id="r4s8t6" location="Forest" time="night">
       <summary>Mira discovers an ancient shrine.</summary>
       
       <beat id="u1v7w3">

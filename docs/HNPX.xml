@@ -18,7 +18,7 @@
       <xs:maxLength value="100"/>
     </xs:restriction>
   </xs:simpleType>
-  <xs:simpleType name="locType">
+  <xs:simpleType name="locationType">
     <xs:restriction base="xs:string">
       <xs:minLength value="1"/>
       <xs:maxLength value="200"/>
@@ -70,7 +70,7 @@
         <xs:element ref="beat" minOccurs="0" maxOccurs="unbounded"/>
       </xs:sequence>
       <xs:attribute name="id" type="idType" use="required"/>
-      <xs:attribute name="location" type="locType" use="required"/>
+      <xs:attribute name="location" type="locationType" use="required"/>
       <xs:attribute name="time" type="timeType"/>
       <xs:attribute name="pov" type="charType"/>
     </xs:complexType>
