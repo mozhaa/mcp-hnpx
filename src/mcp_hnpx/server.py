@@ -266,6 +266,69 @@ def get_node_path(file_path: str, node_id: str) -> str:
     
     return "\n".join(path_xml)
 
+@app.tool()
+def get_document_at_depth(file_path: str, level: str = "full") -> str:
+    """Retrieve XML representation of document at specified depth level
+    
+    Args:
+        file_path: Path to HNPX document
+        level: Depth level - one of:
+            - "book": Only book element with summary
+            - "chapter": Book with chapter children (no deeper)
+            - "sequence": Book → chapters → sequences (no deeper)
+            - "beat": Book → chapters → sequences → beats (no deeper)
+            - "full": Complete document with all levels (default)
+    
+    Returns:
+        XML string of document at requested depth
+    """
+    tree = parse_document(file_path)
+    root = tree.getroot()
+    
+    # Validate level parameter
+    valid_levels = ["book", "chapter", "sequence", "beat", "full"]
+    if level not in valid_levels:
+        raise InvalidAttributeError("level", level, f"Must be one of: {', '.join(valid_levels)}")
+    
+    # Create a copy of the tree to modify
+    from copy import deepcopy
+    tree_copy = deepcopy(tree)
+    root_copy = tree_copy.getroot()
+    
+    # Define hierarchy levels
+    hierarchy = {
+        "book": 0,
+        "chapter": 1,
+        "sequence": 2,
+        "beat": 3,
+        "paragraph": 4
+    }
+    
+    max_depth = hierarchy[level]
+    
+    def prune_tree(node: etree.Element, current_depth: int) -> None:
+        """Recursively remove nodes beyond max_depth"""
+        if current_depth >= max_depth:
+            # Remove all children except summary
+            children_to_remove = []
+            for child in node:
+                if child.tag != "summary":
+                    children_to_remove.append(child)
+            
+            for child in children_to_remove:
+                node.remove(child)
+        else:
+            # Recursively process children
+            for child in list(node):
+                if child.tag in hierarchy:
+                    prune_tree(child, current_depth + 1)
+    
+    # Start pruning from the root (book is at depth 0)
+    prune_tree(root_copy, 0)
+    
+    # Return the pruned tree as XML
+    return etree.tostring(root_copy, encoding='unicode', pretty_print=True)
+
 # ============================================================================
 # Node Creation Tools
 # ============================================================================

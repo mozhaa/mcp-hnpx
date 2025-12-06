@@ -149,6 +149,42 @@ get_node_path("my_story.xml", "xyz789")
 # Returns XML path from book root through all ancestors to the target node
 ```
 
+### get_document_at_depth
+
+**Description:** Retrieve XML representation of the entire document at a specified depth level, allowing you to get a high-level overview without deep detail.
+
+**Parameters:**
+- `file_path` (string, required): Path to the HNPX document
+- `level` (string, optional): Depth level - one of:
+  - "book": Only book element with summary
+  - "chapter": Book with chapter children (no deeper)
+  - "sequence": Book → chapters → sequences (no deeper)
+  - "beat": Book → chapters → sequences → beats (no deeper)
+  - "full": Complete document with all levels (default)
+
+**Returns:** XML string of document at requested depth
+
+**Errors:**
+- `InvalidAttributeError`: Raised if level parameter is not one of the valid options
+
+**Example:**
+```python
+get_document_at_depth("my_story.xml", "chapter")
+# Returns XML like:
+# <book id="abc123">
+#   <summary>A young mage's journey</summary>
+#   <chapter id="def456" title="Chapter 1">
+#     <summary>The beginning of the story</summary>
+#   </chapter>
+#   <chapter id="ghi789" title="Chapter 2">
+#     <summary>The adventure continues</summary>
+#   </chapter>
+# </book>
+
+get_document_at_depth("my_story.xml", "sequence")
+# Returns XML with book → chapters → sequences, but no beats or paragraphs
+```
+
 ---
 
 ## Node Creation Tools
