@@ -15,7 +15,11 @@ from .exceptions import (
 
 
 def create_document(file_path: str) -> str:
-    """Create a new empty HNPX document"""
+    """Create a new empty HNPX document
+    
+    Args:
+        file_path (str): Path where the new HNPX document will be created
+    """
     # Generate initial book ID
     book_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
 
@@ -32,7 +36,14 @@ def create_document(file_path: str) -> str:
 
 
 def get_next_empty_container(file_path: str) -> str:
-    """Find next container node that needs children (BFS order)"""
+    """Find next container node that needs children (BFS order)
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        
+    Returns:
+        str: XML representation of the next empty container node or a message if none found
+    """
     tree = hnpx.parse_document(file_path)
     empty_node = hnpx.find_first_empty_container(tree)
 
@@ -44,7 +55,15 @@ def get_next_empty_container(file_path: str) -> str:
 
 
 def get_next_empty_container_in_node(file_path: str, node_id: str) -> str:
-    """Find next container node that needs children within a specific node's subtree (BFS order)"""
+    """Find next container node that needs children within a specific node's subtree (BFS order)
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        node_id (str): ID of the node to search within
+        
+    Returns:
+        str: XML representation of the next empty container node or a message if none found
+    """
     tree = hnpx.parse_document(file_path)
     start_node = hnpx.find_node(tree, node_id)
 
@@ -61,7 +80,15 @@ def get_next_empty_container_in_node(file_path: str, node_id: str) -> str:
 
 
 def get_node(file_path: str, node_id: str) -> str:
-    """Retrieve XML representation of a specific node (without descendants)"""
+    """Retrieve XML representation of a specific node (without descendants)
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        node_id (str): ID of the node to retrieve
+        
+    Returns:
+        str: XML representation of the node with its attributes and summary child only
+    """
     tree = hnpx.parse_document(file_path)
     node = hnpx.find_node(tree, node_id)
 
@@ -78,7 +105,15 @@ def get_node(file_path: str, node_id: str) -> str:
 
 
 def get_subtree(file_path: str, node_id: str) -> str:
-    """Retrieve XML representation of node including all descendants"""
+    """Retrieve XML representation of node including all descendants
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        node_id (str): ID of the node to retrieve
+        
+    Returns:
+        str: XML representation of the node and all its descendants
+    """
     tree = hnpx.parse_document(file_path)
     node = hnpx.find_node(tree, node_id)
 
@@ -89,7 +124,15 @@ def get_subtree(file_path: str, node_id: str) -> str:
 
 
 def get_direct_children(file_path: str, node_id: str) -> str:
-    """Retrieve immediate child nodes of a specified parent"""
+    """Retrieve immediate child nodes of a specified parent
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        node_id (str): ID of the parent node
+        
+    Returns:
+        str: Concatenated XML representation of all direct child nodes
+    """
     tree = hnpx.parse_document(file_path)
     parent = hnpx.find_node(tree, node_id)
 
@@ -105,7 +148,15 @@ def get_direct_children(file_path: str, node_id: str) -> str:
 
 
 def get_node_path(file_path: str, node_id: str) -> str:
-    """Return hierarchical path from document root to specified node"""
+    """Return hierarchical path from document root to specified node
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        node_id (str): ID of the target node
+        
+    Returns:
+        str: Concatenated XML representation of all nodes in the path from root to target
+    """
     tree = hnpx.parse_document(file_path)
     node = hnpx.find_node(tree, node_id)
 
@@ -129,18 +180,13 @@ def get_node_path(file_path: str, node_id: str) -> str:
 
 def get_document_at_depth(file_path: str, level: str = "chapter") -> str:
     """Retrieve XML representation of document at specified depth level
-
+    
     Args:
-        file_path: Path to HNPX document
-        level: Depth level - one of:
-            - "book": Only book element with summary
-            - "chapter": Book with chapter children (no deeper, default)
-            - "sequence": Book → chapters → sequences (no deeper)
-            - "beat": Book → chapters → sequences → beats (no deeper)
-            - "full": Complete document with all levels
-
+        file_path (str): Path to the HNPX document
+        level (str): Depth level - one of: "book", "chapter", "sequence", "beat", "full"
+        
     Returns:
-        XML string of document at requested depth
+        str: XML representation of the document pruned to the specified depth
     """
     tree = hnpx.parse_document(file_path)
     root = tree.getroot()
@@ -223,7 +269,15 @@ def _create_element(
 def create_chapter(
     file_path: str, parent_id: str, title: str, summary: str, pov: Optional[str] = None
 ) -> str:
-    """Create a new chapter element"""
+    """Create a new chapter element
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        parent_id (str): ID of the parent book element
+        title (str): Chapter title
+        summary (str): Chapter summary text
+        pov (Optional[str]): Point-of-view character identifier
+    """
     tree = hnpx.parse_document(file_path)
 
     attributes = {"title": title}
@@ -245,7 +299,16 @@ def create_sequence(
     time: Optional[str] = None,
     pov: Optional[str] = None,
 ) -> str:
-    """Create a new sequence element"""
+    """Create a new sequence element
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        parent_id (str): ID of the parent chapter element
+        location (str): Location description
+        summary (str): Sequence summary text
+        time (Optional[str]): Time indicator (e.g., "night", "next day", "flashback")
+        pov (Optional[str]): Point-of-view character identifier
+    """
     tree = hnpx.parse_document(file_path)
 
     attributes = {"location": location}
@@ -262,7 +325,13 @@ def create_sequence(
 
 
 def create_beat(file_path: str, parent_id: str, summary: str) -> str:
-    """Create a new beat element"""
+    """Create a new beat element
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        parent_id (str): ID of the parent sequence element
+        summary (str): Beat summary text
+    """
     tree = hnpx.parse_document(file_path)
 
     new_id = _create_element(tree, parent_id, "beat", {}, summary)
@@ -279,7 +348,15 @@ def create_paragraph(
     mode: str = "narration",
     char: Optional[str] = None,
 ) -> str:
-    """Create a new paragraph element"""
+    """Create a new paragraph element
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        parent_id (str): ID of the parent beat element
+        text (str): Paragraph text content
+        mode (str): Narrative mode - one of: "narration" (default), "dialogue", "internal"
+        char (Optional[str]): Character identifier (required when mode="dialogue")
+    """
     tree = hnpx.parse_document(file_path)
 
     attributes = {"mode": mode}
@@ -309,7 +386,13 @@ def create_paragraph(
 
 
 def edit_node_attributes(file_path: str, node_id: str, attributes: dict) -> str:
-    """Modify attributes of an existing node"""
+    """Modify attributes of an existing node
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        node_id (str): ID of the node to modify
+        attributes (dict): Dictionary of attribute names and values to update
+    """
     tree = hnpx.parse_document(file_path)
     node = hnpx.find_node(tree, node_id)
 
@@ -335,7 +418,12 @@ def edit_node_attributes(file_path: str, node_id: str, attributes: dict) -> str:
 
 
 def remove_node(file_path: str, node_id: str) -> str:
-    """Permanently remove a node and all its descendants"""
+    """Permanently remove a node and all its descendants
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        node_id (str): ID of the node to remove
+    """
     tree = hnpx.parse_document(file_path)
     node = hnpx.find_node(tree, node_id)
 
@@ -356,7 +444,13 @@ def remove_node(file_path: str, node_id: str) -> str:
 
 
 def reorder_children(file_path: str, parent_id: str, child_ids: list) -> str:
-    """Reorganize the order of child elements"""
+    """Reorganize the order of child elements
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        parent_id (str): ID of the parent node
+        child_ids (list): List of child IDs in the desired order
+    """
     tree = hnpx.parse_document(file_path)
     parent = hnpx.find_node(tree, parent_id)
 
@@ -390,7 +484,13 @@ def reorder_children(file_path: str, parent_id: str, child_ids: list) -> str:
 
 
 def edit_summary(file_path: str, node_id: str, new_summary: str) -> str:
-    """Edit summary text of any element"""
+    """Edit summary text of any element
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        node_id (str): ID of the node containing the summary
+        new_summary (str): New summary text content
+    """
     tree = hnpx.parse_document(file_path)
     node = hnpx.find_node(tree, node_id)
 
@@ -412,7 +512,13 @@ def edit_summary(file_path: str, node_id: str, new_summary: str) -> str:
 
 
 def edit_paragraph_text(file_path: str, paragraph_id: str, new_text: str) -> str:
-    """Edit actual paragraph content"""
+    """Edit actual paragraph content
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        paragraph_id (str): ID of the paragraph element to modify
+        new_text (str): New paragraph text content
+    """
     tree = hnpx.parse_document(file_path)
     paragraph = hnpx.find_node(tree, paragraph_id)
 
@@ -436,7 +542,14 @@ def edit_paragraph_text(file_path: str, paragraph_id: str, new_text: str) -> str
 def move_node(
     file_path: str, node_id: str, new_parent_id: str, position: Optional[int] = None
 ) -> str:
-    """Move nodes between parents"""
+    """Move nodes between parents
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        node_id (str): ID of the node to move
+        new_parent_id (str): ID of the new parent node
+        position (Optional[int]): Position index in the new parent's children (0-based)
+    """
     tree = hnpx.parse_document(file_path)
     node = hnpx.find_node(tree, node_id)
     new_parent = hnpx.find_node(tree, new_parent_id)
@@ -507,7 +620,12 @@ def move_node(
 
 
 def remove_node_children(file_path: str, node_id: str) -> str:
-    """Remove all children of a node"""
+    """Remove all children of a node
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        node_id (str): ID of the parent node
+    """
     tree = hnpx.parse_document(file_path)
     node = hnpx.find_node(tree, node_id)
 
@@ -570,7 +688,15 @@ def _render_node_recursive(node: etree.Element, indent: int = 0) -> str:
 
 
 def render_node(file_path: str, node_id: str) -> str:
-    """Render a node and descendants as formatted text"""
+    """Render a node and descendants as formatted text
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        node_id (str): ID of the node to render
+        
+    Returns:
+        str: Formatted text representation of the node and its descendants
+    """
     tree = hnpx.parse_document(file_path)
     node = hnpx.find_node(tree, node_id)
 
@@ -581,7 +707,14 @@ def render_node(file_path: str, node_id: str) -> str:
 
 
 def render_document(file_path: str) -> str:
-    """Export entire document to plain text"""
+    """Export entire document to plain text
+    
+    Args:
+        file_path (str): Path to the HNPX document
+        
+    Returns:
+        str: Complete document rendered as readable plain text
+    """
     tree = hnpx.parse_document(file_path)
 
     paragraphs = []
