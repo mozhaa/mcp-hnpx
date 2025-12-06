@@ -393,13 +393,12 @@ Args:
     paragraph_id (str): ID of the paragraph element to modify
     new_text (str): New paragraph text content
 
-- move_node: Move nodes between parents
+- move_nodes: Move multiple nodes between parents
 
 Args:
     file_path (str): Path to the HNPX document
-    node_id (str): ID of the node to move
+    node_ids (list): List of node IDs to move
     new_parent_id (str): ID of the new parent node
-    position (Optional[int]): Position index in the new parent's children (0-based)
 
 - remove_node_children: Remove all children of a node
 
