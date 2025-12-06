@@ -41,7 +41,7 @@ def get_next_empty_container(file_path: str) -> str:
         return "No empty containers found - document is fully expanded"
 
     # Return node XML (like get_node)
-    return etree.tostring(empty_node, encoding="unicode")
+    return etree.tostring(empty_node, encoding="unicode", method="html")
 
 
 def get_next_empty_container_in_node(file_path: str, node_id: str) -> str:
@@ -58,7 +58,7 @@ def get_next_empty_container_in_node(file_path: str, node_id: str) -> str:
         return f"No empty containers found within node {node_id}"
 
     # Return node XML (like get_node)
-    return etree.tostring(empty_node, encoding="unicode")
+    return etree.tostring(empty_node, encoding="unicode", method="html")
 
 
 def get_node(file_path: str, node_id: str) -> str:
@@ -70,7 +70,7 @@ def get_node(file_path: str, node_id: str) -> str:
         raise NodeNotFoundError(node_id)
 
     # Return node with all attributes and summary child
-    return etree.tostring(node, encoding="unicode")
+    return etree.tostring(node, encoding="unicode", method="html")
 
 
 def get_subtree(file_path: str, node_id: str) -> str:
@@ -81,7 +81,7 @@ def get_subtree(file_path: str, node_id: str) -> str:
     if node is None:
         raise NodeNotFoundError(node_id)
 
-    return etree.tostring(node, encoding="unicode")
+    return etree.tostring(node, encoding="unicode", method="html")
 
 
 def get_direct_children(file_path: str, node_id: str) -> str:
@@ -95,7 +95,7 @@ def get_direct_children(file_path: str, node_id: str) -> str:
     # Return concatenated XML of all direct children
     children_xml = []
     for child in parent:
-        children_xml.append(etree.tostring(child, encoding="unicode"))
+        children_xml.append(etree.tostring(child, encoding="unicode", method="html"))
 
     return "\n".join(children_xml)
 
@@ -118,7 +118,7 @@ def get_node_path(file_path: str, node_id: str) -> str:
     # Return concatenated XML of all ancestors
     path_xml = []
     for ancestor in ancestors:
-        path_xml.append(etree.tostring(ancestor, encoding="unicode"))
+        path_xml.append(etree.tostring(ancestor, encoding="unicode", method="html"))
 
     return "\n".join(path_xml)
 
