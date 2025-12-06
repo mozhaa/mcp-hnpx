@@ -12,11 +12,6 @@ A valid HNPX document is a single XML file with this strict hierarchy:
 book → chapter → sequence → beat → paragraph
 ```
 
-Each element must have:
-- A unique `id` attribute
-- A `<summary>` child element
-- No other child elements except those defined in this specification
-
 ---
 
 ## Element Definitions
@@ -149,7 +144,7 @@ Examples: `a3f9b2`, `c8e4d1`, `x7j5m2`
 
 ## Summary Requirement
 
-Every container element (`book`, `chapter`, `sequence`, `beat`, `paragraph`) must contain exactly one `<summary>` child element.
+Every container element (`book`, `chapter`, `sequence`, `beat`) must contain exactly one `<summary>` child element. `paragraph` can't have summary, only text content.
 
 The `<summary>` element:
 - Contains plain text
@@ -184,56 +179,9 @@ A valid HNPX document must:
 2. Contain only the elements defined in this specification
 3. Have all required attributes present
 4. Have unique `id` values throughout
-5. Have `<summary>` child for every container
+5. Have `<summary>` child for every container node
 6. Have `char` attribute when `mode="dialogue"`
 7. Maintain the hierarchy: book → chapter → sequence → beat → paragraph
-
----
-
-## Example Complete Document
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<book id="x7j5m2">
-  <summary>A young mage's journey to uncover her forgotten past.</summary>
-  
-  <chapter id="k9p3q1" title="The Awakening" pov="mira">
-    <summary>A young mage discovers her powers in the forbidden woods.</summary>
-    
-    <sequence id="r4s8t6" location="Forest" time="night">
-      <summary>Mira discovers an ancient shrine.</summary>
-      
-      <beat id="u1v7w3">
-        <summary>Entering the forbidden woods.</summary>
-        
-        <paragraph id="z5y2x4" mode="narration">
-          <summary>Mira pushes through the undergrowth.</summary>
-          Mira pushed through the thick undergrowth, her breath fogging in the cold air.
-        </paragraph>
-        
-        <paragraph id="m6n8b4" mode="narration">
-          <summary>Description of the ancient trees.</summary>
-          The ancient trees loomed overhead, their branches forming a canopy that blocked out the moon.
-        </paragraph>
-      </beat>
-      
-      <beat id="p9o3i7">
-        <summary>Finding the shrine.</summary>
-        
-        <paragraph id="l2k8j5" mode="dialogue" char="mira">
-          <summary>Mira speaks her doubt.</summary>
-          "Is this... the place from my dreams?"
-        </paragraph>
-        
-        <paragraph id="q1w9e3" mode="internal">
-          <summary>Mira's internal realization.</summary>
-          This was exactly as she had dreamed it, down to the moss pattern on the stones.
-        </paragraph>
-      </beat>
-    </sequence>
-  </chapter>
-</book>
-```
 
 ---
 
