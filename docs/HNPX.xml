@@ -35,8 +35,13 @@
       <xs:maxLength value="50"/>
     </xs:restriction>
   </xs:simpleType>
+  <xs:simpleType name="proseType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
   <xs:element name="summary">
-    <xs:complexType mixed="true">
+    <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
           <xs:attribute name="id" use="prohibited"/>
@@ -45,13 +50,14 @@
     </xs:complexType>
   </xs:element>
   <xs:element name="paragraph">
-    <xs:complexType mixed="true">
-      <xs:sequence>
-        <xs:element ref="summary" minOccurs="1" maxOccurs="1"/>
-      </xs:sequence>
-      <xs:attribute name="id" type="idType" use="required"/>
-      <xs:attribute name="mode" type="modeType" default="narration"/>
-      <xs:attribute name="char" type="charType"/>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="proseType">
+          <xs:attribute name="id" type="idType" use="required"/>
+          <xs:attribute name="mode" type="modeType" default="narration"/>
+          <xs:attribute name="char" type="charType"/>
+        </xs:extension>
+      </xs:simpleContent>
     </xs:complexType>
   </xs:element>
   <xs:element name="beat">
@@ -70,7 +76,7 @@
         <xs:element ref="beat" minOccurs="0" maxOccurs="unbounded"/>
       </xs:sequence>
       <xs:attribute name="id" type="idType" use="required"/>
-      <xs:attribute name="location" type="locationType" use="required"/>
+      <xs:attribute name="location" type="locationType" use="optional"/>
       <xs:attribute name="time" type="timeType"/>
       <xs:attribute name="pov" type="charType"/>
     </xs:complexType>
