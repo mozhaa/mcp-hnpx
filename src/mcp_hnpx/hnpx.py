@@ -1,7 +1,9 @@
 import random
 import string
+from functools import cache
 from pathlib import Path
 from typing import Optional
+
 from lxml import etree
 
 from .exceptions import (
@@ -11,19 +13,29 @@ from .exceptions import (
 
 def load_schema() -> etree.XMLSchema:
     """Load HNPX schema from docs directory"""
-    schema_path = Path(__file__).parent.parent.parent / "docs" / "HNPX.xml"
-    schema_doc = etree.parse(str(schema_path))
-    return etree.XMLSchema(schema_doc)
+
+    @cache
+    def load_schema_doc() -> str:
+        schema_path = Path(__file__).parent.parent.parent / "docs" / "HNPX.xml"
+        return etree.parse(str(schema_path))
+
+    return etree.XMLSchema(load_schema_doc())
 
 
 def parse_document(file_path: str) -> etree.ElementTree:
     """Parse XML file and return ElementTree"""
     parser = etree.XMLParser(remove_blank_text=True)
-    return etree.parse(file_path, parser)
+    tree = etree.parse(file_path, parser)
+
+    # Valudate document right after read
+    validate_document(tree)
+
+    return tree
 
 
-def validate_document(tree: etree.ElementTree, schema: etree.XMLSchema) -> None:
+def validate_document(tree: etree.ElementTree) -> None:
     """Validate document against schema, raise ValidationError if invalid"""
+    schema = load_schema()
     if not schema.validate(tree):
         raise ValidationError(schema.error_log)
 
@@ -47,6 +59,10 @@ def validate_document(tree: etree.ElementTree, schema: etree.XMLSchema) -> None:
 
 def save_document(tree: etree.ElementTree, file_path: str) -> None:
     """Save document to file with pretty printing"""
+
+    # Validate document before saving
+    validate_document(tree)
+
     tree.write(file_path, pretty_print=True, encoding="UTF-8", xml_declaration=True)
 
 

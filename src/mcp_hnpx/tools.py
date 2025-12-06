@@ -231,9 +231,6 @@ def create_chapter(
 
     new_id = _create_element(tree, parent_id, "chapter", attributes, summary)
 
-    # Validate and save
-    schema = hnpx.load_schema()
-    hnpx.validate_document(tree, schema)
     hnpx.save_document(tree, file_path)
 
     return f"Created chapter with id {new_id}"
@@ -258,9 +255,6 @@ def create_sequence(
 
     new_id = _create_element(tree, parent_id, "sequence", attributes, summary)
 
-    # Validate and save
-    schema = hnpx.load_schema()
-    hnpx.validate_document(tree, schema)
     hnpx.save_document(tree, file_path)
 
     return f"Created sequence with id {new_id}"
@@ -272,9 +266,6 @@ def create_beat(file_path: str, parent_id: str, summary: str) -> str:
 
     new_id = _create_element(tree, parent_id, "beat", {}, summary)
 
-    # Validate and save
-    schema = hnpx.load_schema()
-    hnpx.validate_document(tree, schema)
     hnpx.save_document(tree, file_path)
 
     return f"Created beat with id {new_id}"
@@ -314,9 +305,6 @@ def create_paragraph(
     summary_elem.text = summary
     paragraph.text = text
 
-    # Validate and save
-    schema = hnpx.load_schema()
-    hnpx.validate_document(tree, schema)
     hnpx.save_document(tree, file_path)
 
     return f"Created paragraph with id {new_id}"
@@ -343,9 +331,6 @@ def edit_node_attributes(file_path: str, node_id: str, attributes: dict) -> str:
         else:
             node.set(key, value)
 
-    # Validate and save
-    schema = hnpx.load_schema()
-    hnpx.validate_document(tree, schema)
     hnpx.save_document(tree, file_path)
 
     return f"Updated attributes for node {node_id}"
@@ -367,9 +352,6 @@ def remove_node(file_path: str, node_id: str) -> str:
     parent = node.getparent()
     parent.remove(node)
 
-    # Validate and save
-    schema = hnpx.load_schema()
-    hnpx.validate_document(tree, schema)
     hnpx.save_document(tree, file_path)
 
     return f"Removed node {node_id} and its descendants"
@@ -404,9 +386,6 @@ def reorder_children(file_path: str, parent_id: str, child_ids: list) -> str:
     for child_id in child_ids:
         parent.append(child_map[child_id])
 
-    # Validate and save
-    schema = hnpx.load_schema()
-    hnpx.validate_document(tree, schema)
     hnpx.save_document(tree, file_path)
 
     return f"Reordered children of node {parent_id}"
@@ -429,9 +408,6 @@ def edit_summary(file_path: str, node_id: str, new_summary: str) -> str:
     # Update the summary text
     summary_elem.text = new_summary
 
-    # Validate and save
-    schema = hnpx.load_schema()
-    hnpx.validate_document(tree, schema)
     hnpx.save_document(tree, file_path)
 
     return f"Updated summary for node {node_id}"
@@ -454,9 +430,6 @@ def edit_paragraph_text(file_path: str, paragraph_id: str, new_text: str) -> str
     # Update the paragraph text content
     paragraph.text = new_text
 
-    # Validate and save
-    schema = hnpx.load_schema()
-    hnpx.validate_document(tree, schema)
     hnpx.save_document(tree, file_path)
 
     return f"Updated text content for paragraph {paragraph_id}"
@@ -530,9 +503,6 @@ def move_node(
                 position + (1 if new_parent[0].tag == "summary" else 0), node
             )
 
-    # Validate and save
-    schema = hnpx.load_schema()
-    hnpx.validate_document(tree, schema)
     hnpx.save_document(tree, file_path)
 
     return f"Moved node {node_id} to parent {new_parent_id}"
@@ -554,9 +524,6 @@ def remove_node_children(file_path: str, node_id: str) -> str:
             node.remove(child)
             children_count += 1
 
-    # Validate and save
-    schema = hnpx.load_schema()
-    hnpx.validate_document(tree, schema)
     hnpx.save_document(tree, file_path)
 
     return f"Removed {children_count} children from node {node_id}"
