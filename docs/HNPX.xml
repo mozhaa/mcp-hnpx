@@ -32,7 +32,6 @@
   </xs:simpleType>
   <xs:simpleType name="charType">
     <xs:restriction base="xs:string">
-      <xs:pattern value="[a-zA-Z0-9_\-]+"/>
       <xs:maxLength value="50"/>
     </xs:restriction>
   </xs:simpleType>
@@ -59,7 +58,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="summary" minOccurs="1" maxOccurs="1"/>
-        <xs:element ref="paragraph" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element ref="paragraph" minOccurs="0" maxOccurs="unbounded"/>
       </xs:sequence>
       <xs:attribute name="id" type="idType" use="required"/>
     </xs:complexType>
@@ -68,10 +67,10 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="summary" minOccurs="1" maxOccurs="1"/>
-        <xs:element ref="beat" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element ref="beat" minOccurs="0" maxOccurs="unbounded"/>
       </xs:sequence>
       <xs:attribute name="id" type="idType" use="required"/>
-      <xs:attribute name="loc" type="locType" use="required"/>
+      <xs:attribute name="location" type="locType" use="required"/>
       <xs:attribute name="time" type="timeType"/>
       <xs:attribute name="pov" type="charType"/>
     </xs:complexType>
@@ -80,7 +79,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="summary" minOccurs="1" maxOccurs="1"/>
-        <xs:element ref="sequence" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element ref="sequence" minOccurs="0" maxOccurs="unbounded"/>
       </xs:sequence>
       <xs:attribute name="id" type="idType" use="required"/>
       <xs:attribute name="title" type="titleType" use="required"/>
@@ -91,7 +90,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="summary" minOccurs="1" maxOccurs="1"/>
-        <xs:element ref="chapter" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element ref="chapter" minOccurs="0" maxOccurs="unbounded"/>
       </xs:sequence>
       <xs:attribute name="id" type="idType" use="required"/>
     </xs:complexType>

@@ -29,7 +29,7 @@ The root element containing the entire work.
 
 **Children:**
 - `<summary>` (required)
-- `<chapter>` (one or more)
+- `<chapter>` (zero or more)
 
 **Content:** None
 
@@ -55,7 +55,7 @@ Major narrative division with a title.
 
 **Children:**
 - `<summary>` (required)
-- `<sequence>` (one or more)
+- `<sequence>` (zero or more)
 
 **Content:** None
 
@@ -82,7 +82,7 @@ Continuous narrative in a single location and time frame.
 
 **Children:**
 - `<summary>` (required)
-- `<beat>` (one or more)
+- `<beat>` (zero or more)
 
 **Content:** None
 
@@ -106,7 +106,7 @@ Narrative unit grouping related paragraphs within a sequence.
 
 **Children:**
 - `<summary>` (required)
-- `<paragraph>` (one or more)
+- `<paragraph>` (zero or more)
 
 **Content:** None
 
