@@ -137,7 +137,7 @@ def render_paragraph(paragraph: etree.Element) -> str:
         return ""
 
     if mode == "dialogue" and char:
-        return f'{char}: "{text}"'
+        return f'{char}: {text}'
     elif mode == "internal":
         return f"*{text}*"
     else:

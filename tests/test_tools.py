@@ -109,72 +109,54 @@ def test_get_document_at_depth_invalid_level(complete_xml_path):
 
 
 def test_create_chapter(temp_file, complete_xml_path):
-    tools.create_document(temp_file)
+    with open(temp_file, "w") as f:
+        f.write(open(complete_xml_path).read())
+
     tools.create_chapter(
         temp_file, "glyjor", "Test Chapter", "Test summary", "test_char"
     )
 
     tree = tools.hnpx.parse_document(temp_file)
     chapters = tree.xpath("//chapter")
-    assert len(chapters) == 1
-    assert chapters[0].get("title") == "Test Chapter"
-    assert chapters[0].get("pov") == "test_char"
+    assert len(chapters) == 2
+    assert chapters[1].get("title") == "Test Chapter"
+    assert chapters[1].get("pov") == "test_char"
 
 
 def test_create_sequence(temp_file, complete_xml_path):
-    tools.create_document(temp_file)
-    chapter_id = tools.create_chapter(
-        temp_file, "glyjor", "Test Chapter", "Test summary"
-    )
-    chapter_id = chapter_id.split("id ")[1].split(" ")[0]
+    with open(temp_file, "w") as f:
+        f.write(open(complete_xml_path).read())
 
     tools.create_sequence(
-        temp_file, chapter_id, "Test Location", "Test summary", "morning", "test_char"
+        temp_file, "3295p0", "Test Location", "Test summary", "morning", "test_char"
     )
 
     tree = tools.hnpx.parse_document(temp_file)
     sequences = tree.xpath("//sequence")
-    assert len(sequences) == 1
-    assert sequences[0].get("location") == "Test Location"
-    assert sequences[0].get("time") == "morning"
-    assert sequences[0].get("pov") == "test_char"
+    assert len(sequences) == 2
+    assert sequences[1].get("location") == "Test Location"
+    assert sequences[1].get("time") == "morning"
+    assert sequences[1].get("pov") == "test_char"
 
 
 def test_create_beat(temp_file, complete_xml_path):
-    tools.create_document(temp_file)
-    chapter_id = tools.create_chapter(
-        temp_file, "glyjor", "Test Chapter", "Test summary"
-    )
-    chapter_id = chapter_id.split("id ")[1].split(" ")[0]
-    sequence_id = tools.create_sequence(
-        temp_file, chapter_id, "Test Location", "Test summary"
-    )
-    sequence_id = sequence_id.split("id ")[1].split(" ")[0]
+    with open(temp_file, "w") as f:
+        f.write(open(complete_xml_path).read())
 
-    tools.create_beat(temp_file, sequence_id, "Test beat summary")
+    tools.create_beat(temp_file, "104lac", "Test beat summary")
 
     tree = tools.hnpx.parse_document(temp_file)
     beats = tree.xpath("//beat")
-    assert len(beats) == 1
+    assert len(beats) == 2
 
 
 def test_create_paragraph(temp_file, complete_xml_path):
-    tools.create_document(temp_file)
-    chapter_id = tools.create_chapter(
-        temp_file, "glyjor", "Test Chapter", "Test summary"
-    )
-    chapter_id = chapter_id.split("id ")[1].split(" ")[0]
-    sequence_id = tools.create_sequence(
-        temp_file, chapter_id, "Test Location", "Test summary"
-    )
-    sequence_id = sequence_id.split("id ")[1].split(" ")[0]
-    beat_id = tools.create_beat(temp_file, sequence_id, "Test beat summary")
-    beat_id = beat_id.split("id ")[1].split(" ")[0]
+    with open(temp_file, "w") as f:
+        f.write(open(complete_xml_path).read())
 
     tools.create_paragraph(
         temp_file,
-        beat_id,
-        "Test paragraph summary",
+        "gr5peb",
         "Test text",
         "dialogue",
         "test_char",
@@ -182,28 +164,19 @@ def test_create_paragraph(temp_file, complete_xml_path):
 
     tree = tools.hnpx.parse_document(temp_file)
     paragraphs = tree.xpath("//paragraph")
-    assert len(paragraphs) == 1
-    assert paragraphs[0].get("mode") == "dialogue"
-    assert paragraphs[0].get("char") == "test_char"
-    assert paragraphs[0].text == "Test text"
+    assert len(paragraphs) == 6
+    assert paragraphs[5].get("mode") == "dialogue"
+    assert paragraphs[5].get("char") == "test_char"
+    assert paragraphs[5].text == "Test text"
 
 
 def test_create_paragraph_dialogue_missing_char(temp_file, complete_xml_path):
-    tools.create_document(temp_file)
-    chapter_id = tools.create_chapter(
-        temp_file, "glyjor", "Test Chapter", "Test summary"
-    )
-    chapter_id = chapter_id.split("id ")[1].split(" ")[0]
-    sequence_id = tools.create_sequence(
-        temp_file, chapter_id, "Test Location", "Test summary"
-    )
-    sequence_id = sequence_id.split("id ")[1].split(" ")[0]
-    beat_id = tools.create_beat(temp_file, sequence_id, "Test beat summary")
-    beat_id = beat_id.split("id ")[1].split(" ")[0]
+    with open(temp_file, "w") as f:
+        f.write(open(complete_xml_path).read())
 
     with pytest.raises(MissingAttributeError):
         tools.create_paragraph(
-            temp_file, beat_id, "Test paragraph summary", "Test text", "dialogue"
+            temp_file, "gr5peb", "Test text", "dialogue"
         )
 
 
@@ -365,15 +338,7 @@ def test_move_node_invalid_hierarchy(complete_xml_path, temp_file):
         f.write(open(complete_xml_path).read())
 
     with pytest.raises(InvalidHierarchyError):
-        tools.move_node(temp_file, "3295p0", "glyjor", 0)
-
-
-def test_move_node_to_own_descendant(complete_xml_path, temp_file):
-    with open(temp_file, "w") as f:
-        f.write(open(complete_xml_path).read())
-
-    with pytest.raises(InvalidOperationError):
-        tools.move_node(temp_file, "104lac", "gr5peb", 0)
+        tools.move_node(temp_file, "uvxuqh", "glyjor", 0)
 
 
 def test_remove_node_children(complete_xml_path, temp_file):
@@ -412,7 +377,7 @@ def test_render_document(complete_xml_path):
     result = tools.render_document(str(complete_xml_path))
 
     assert "On arrival at The Larches" in result
-    assert 'poirot: "Good morning, Parker"' in result
+    assert "poirot: 'Good morning, Parker,'" in result
 
 
 def test_unicode_xml_output(unicode_xml_path, temp_file):

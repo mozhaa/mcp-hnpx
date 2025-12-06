@@ -274,7 +274,6 @@ def create_beat(file_path: str, parent_id: str, summary: str) -> str:
 def create_paragraph(
     file_path: str,
     parent_id: str,
-    summary: str,
     text: str,
     mode: str = "narration",
     char: Optional[str] = None,
@@ -301,8 +300,6 @@ def create_paragraph(
     attributes["id"] = new_id
 
     paragraph = etree.SubElement(parent, "paragraph", **attributes)
-    summary_elem = etree.SubElement(paragraph, "summary")
-    summary_elem.text = summary
     paragraph.text = text
 
     hnpx.save_document(tree, file_path)

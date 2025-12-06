@@ -12,8 +12,7 @@ def test_parse_document(complete_xml_path):
 
 def test_validate_document_valid(complete_xml_path):
     tree = hnpx.parse_document(str(complete_xml_path))
-    schema = hnpx.load_schema()
-    hnpx.validate_document(tree, schema)
+    hnpx.validate_document(tree)
 
 
 def test_validate_document_invalid_missing_attributes():
@@ -26,10 +25,9 @@ def test_validate_document_invalid_missing_attributes():
 
     tree = etree.fromstring(invalid_xml)
     tree = etree.ElementTree(tree)
-    schema = hnpx.load_schema()
 
     with pytest.raises(ValidationError):
-        hnpx.validate_document(tree, schema)
+        hnpx.validate_document(tree)
 
 
 def test_validate_document_invalid_wrong_hierarchy():
@@ -42,10 +40,9 @@ def test_validate_document_invalid_wrong_hierarchy():
 
     tree = etree.fromstring(invalid_xml)
     tree = etree.ElementTree(tree)
-    schema = hnpx.load_schema()
 
     with pytest.raises(ValidationError):
-        hnpx.validate_document(tree, schema)
+        hnpx.validate_document(tree)
 
 
 def test_validate_document_invalid_duplicate_ids():
@@ -58,10 +55,9 @@ def test_validate_document_invalid_duplicate_ids():
 
     tree = etree.fromstring(invalid_xml)
     tree = etree.ElementTree(tree)
-    schema = hnpx.load_schema()
 
     with pytest.raises(ValidationError):
-        hnpx.validate_document(tree, schema)
+        hnpx.validate_document(tree)
 
 
 def test_save_document(temp_file):
@@ -167,7 +163,7 @@ def test_render_paragraph_dialogue():
     paragraph.text = "Hello there!"
 
     result = hnpx.render_paragraph(paragraph)
-    assert result == 'john: "Hello there!"'
+    assert result == 'john: Hello there!'
 
 
 def test_render_paragraph_internal():
