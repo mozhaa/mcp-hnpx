@@ -516,7 +516,7 @@ Returns:
 
 ### HNPX MCP TOOL USAGE TIPS
 
-- When you don't have enough context to proceed with current task, acquire it via `get_document_at_depth`/`get_direct_children`/`get_subtree`
+- When you don't have enough context to proceed with current task, acquire it via `get_document_at_depth`/`get_direct_children`/`get_subtree`. **IMPORTANT**: Always prefer not to read full file, but use `chapter`/`sequence` granularity level in `get_document_at_depth`, and use `get_subtree` only on low-level nodes (`beat`, `paragraph`).
 
 - When user tells you to just continue working on the project without specifying any particular parts of it, use `get_next_empty_container`/`get_next_empty_container_in_node` to get the node to work on
 
