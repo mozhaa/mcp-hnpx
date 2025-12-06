@@ -78,6 +78,10 @@ def get_next_empty_container_in_node(file_path: str, node_id: str) -> str:
     # Return node XML (like get_node)
     return etree.tostring(empty_node, encoding="unicode", method="html")
 
+def _remove_children(node: Any) -> None:
+    for child in node:
+        if child.tag != "summary":
+            node.remove(child)
 
 def get_node(file_path: str, node_id: str) -> str:
     """Retrieve XML representation of a specific node (without descendants)
@@ -95,10 +99,7 @@ def get_node(file_path: str, node_id: str) -> str:
     if node is None:
         raise NodeNotFoundError(node_id)
 
-    # Keep only current node and it's summary
-    for child in node:
-        if child.tag != "summary":
-            node.remove(child)
+    _remove_children(node)
 
     # Return node with all attributes and summary child
     return etree.tostring(node, encoding="unicode", method="html")
@@ -142,6 +143,9 @@ def get_direct_children(file_path: str, node_id: str) -> str:
     # Return concatenated XML of all direct children
     children_xml = []
     for child in parent:
+        if child.tag == "summary":
+            continue
+        _remove_children(child)
         children_xml.append(etree.tostring(child, encoding="unicode", method="html"))
 
     return "\n".join(children_xml)

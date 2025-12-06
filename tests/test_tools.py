@@ -76,6 +76,10 @@ def test_get_direct_children(complete_xml_path):
 
     assert "<sequence" in result
     assert 'id="104lac"' in result
+    assert 'beat' not in result
+    assert 'paragraph' not in result
+    assert 'The interrogation of Parker begins.' in result
+    assert 'As we entered the room' not in result
 
 
 def test_get_node_path(complete_xml_path):
