@@ -7,6 +7,7 @@ app = fastmcp.FastMCP("hnpx-server", version="1.0.0")
 app.tool()(tools.create_document)
 
 # Navigation & Discovery Tools
+app.tool()(tools.get_root_id)
 app.tool()(tools.get_node)
 app.tool()(tools.get_subtree)
 app.tool()(tools.get_children)

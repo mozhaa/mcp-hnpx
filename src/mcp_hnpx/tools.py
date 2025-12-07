@@ -36,6 +36,20 @@ def create_document(file_path: str) -> str:
     return f"Created book with id {book_id} at {file_path}"
 
 
+def get_root_id(file_path: str) -> str:
+    """Get ID of the book node (document root)
+
+    Args:
+        file_path (str): Path to the HNPX document
+
+    Returns:
+        str: ID of the book node
+    """
+    tree = hnpx.parse_document(file_path)
+    root = tree.getroot()
+    return root.get("id")
+
+
 def get_empty(file_path: str, node_id: str) -> str:
     """Find next container node without children within a specific node's subtree (BFS order)
 

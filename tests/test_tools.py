@@ -23,6 +23,12 @@ def test_create_document_invalid_path():
         tools.create_document("/invalid/path/test.xml")
 
 
+def test_get_root_id(complete_xml_path):
+    book_id = tools.get_root_id(str(complete_xml_path))
+
+    assert book_id == "glyjor"
+
+
 def test_get_empty(incomplete_xml_path):
     result = tools.get_empty(str(incomplete_xml_path), "3295p0")
 
