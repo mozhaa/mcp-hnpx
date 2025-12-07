@@ -336,67 +336,59 @@ You can use these tools from `hnpx` MCP server:
 Args:
     file_path (str): Path where the new HNPX document will be created
 
-- get_next_empty_container: Find next container node that needs children (BFS order)
+- get_root_id: Get ID of the book node (document root)
 
 Args:
     file_path (str): Path to the HNPX document
-    
-Returns:
-    str: XML representation of the next empty container node or a message if none found
 
-- get_next_empty_container_in_node: Find next container node that needs children within a specific node's subtree (BFS order)
-
-Args:
-    file_path (str): Path to the HNPX document
-    node_id (str): ID of the node to search within
-    
 Returns:
-    str: XML representation of the next empty container node or a message if none found
+    str: ID of the book node
 
 - get_node: Retrieve XML representation of a specific node (without descendants)
 
 Args:
     file_path (str): Path to the HNPX document
     node_id (str): ID of the node to retrieve
-    
+
 Returns:
     str: XML representation of the node with its attributes and summary child only
 
-- get_subtree: Retrieve XML representation of node including all descendants
+- get_subtree: Retrieve XML representation of node including all descendants, optionally pruned
 
 Args:
     file_path (str): Path to the HNPX document
     node_id (str): ID of the node to retrieve
-    
-Returns:
-    str: XML representation of the node and all its descendants
+    pruning_level (str): Depth level - one of: "book", "chapter", "sequence", "beat", "full"
 
-- get_direct_children: Retrieve immediate child nodes of a specified parent
+Returns:
+    str: XML representation of the node and its descendants, pruned to specified depth
+
+- get_children: Retrieve immediate child nodes of a specified parent
 
 Args:
     file_path (str): Path to the HNPX document
     node_id (str): ID of the parent node
-    
+
 Returns:
     str: Concatenated XML representation of all direct child nodes
 
-- get_node_path: Return hierarchical path from document root to specified node
+- get_empty: Find next container node without children within a specific node's subtree (BFS order)
+
+Args:
+    file_path (str): Path to the HNPX document
+    node_id (str): ID of the node to search within
+
+Returns:
+    str: XML representation of the next empty container node or a message if none found
+
+- get_path: Return hierarchical path from document root to specified node
 
 Args:
     file_path (str): Path to the HNPX document
     node_id (str): ID of the target node
-    
+
 Returns:
     str: Concatenated XML representation of all nodes in the path from root to target
-
-- get_document_at_depth: Retrieve XML representation of document at specified depth level
-
-Args:
-    file_path (str): Path to the HNPX document
-    level (str): Depth level - one of: "book", "chapter", "sequence", "beat", "full"
-    
-Returns:
-    str: XML representation of the document pruned to the specified depth
 
 - create_chapter: Create a new chapter element
 
@@ -433,39 +425,26 @@ Args:
     mode (str): Narrative mode - one of: "narration" (default), "dialogue", "internal"
     char (Optional[str]): Character identifier (required when mode="dialogue")
 
-- edit_node_attributes: Modify attributes of an existing node
-
-Args:
-    file_path (str): Path to the HNPX document
-    node_id (str): ID of the node to modify
-    attributes (dict): Dictionary of attribute names and values to update
-
-- remove_node: Permanently remove a node and all its descendants
-
-Args:
-    file_path (str): Path to the HNPX document
-    node_id (str): ID of the node to remove
-
-- reorder_children: Reorganize the order of child elements
-
-Args:
-    file_path (str): Path to the HNPX document
-    parent_id (str): ID of the parent node
-    child_ids (list): List of child IDs in the desired order
-
-- edit_summary: Edit summary text of any element
+- edit_summary: Edit summary text of a node
 
 Args:
     file_path (str): Path to the HNPX document
     node_id (str): ID of the node containing the summary
     new_summary (str): New summary text content
 
-- edit_paragraph_text: Edit actual paragraph content
+- edit_paragraph_text: Edit paragraph text content
 
 Args:
     file_path (str): Path to the HNPX document
-    paragraph_id (str): ID of the paragraph element to modify
+    node_id (str): ID of the paragraph node to modify
     new_text (str): New paragraph text content
+
+- edit_node_attributes: Modify attributes of an existing node
+
+Args:
+    file_path (str): Path to the HNPX document
+    node_id (str): ID of the node to modify
+    attributes (dict): Dictionary of attribute names and values to update
 
 - move_nodes: Move multiple nodes between parents
 
@@ -474,28 +453,34 @@ Args:
     node_ids (list): List of node IDs to move
     new_parent_id (str): ID of the new parent node
 
+- reorder_children: Reorganize the order of child elements
+
+Args:
+    file_path (str): Path to the HNPX document
+    parent_id (str): ID of the parent node
+    child_ids (list): List of child IDs in the desired order
+
+- remove_nodes: Permanently remove multiple nodes and all their descendants
+
+Args:
+    file_path (str): Path to the HNPX document
+    node_ids (list): List of node IDs to remove
+
 - remove_node_children: Remove all children of a node
 
 Args:
     file_path (str): Path to the HNPX document
     node_id (str): ID of the parent node
 
-- render_node: Render a node and descendants as formatted text
+- render_node: Render text representation of the node (only descendent paragraphs)
 
 Args:
     file_path (str): Path to the HNPX document
     node_id (str): ID of the node to render
-    
-Returns:
-    str: Formatted text representation of the node and its descendants
+    show_ids (bool): Whether to show paragraph IDs in square brackets
 
-- render_document: Export entire document to plain text
-
-Args:
-    file_path (str): Path to the HNPX document
-    
 Returns:
-    str: Complete document rendered as readable plain text
+    str: Formatted text representation the node
 
 ## GUIDELINES
 
@@ -519,22 +504,24 @@ Returns:
 
 ### HNPX MCP TOOL USAGE TIPS
 
-- When you don't have enough context to proceed with current task, acquire it via `get_document_at_depth`/`get_direct_children`/`get_subtree`. **IMPORTANT**: Always prefer not to read full file, but use `chapter`/`sequence` granularity level in `get_document_at_depth`, and use `get_subtree` only on low-level nodes (`beat`, `paragraph`).
+- Before starting new writing task, use `get_subtree` on the `<book>` node with pruning_level of `chapter`/`sequence`, to acquire general book context
 
-- When you need only text content, and not actual XML tags, prefer using `render_node` instead of `get_subtree`, even on low-level nodes.
+- When user tells you to edit existing text, use `render_node` to get text representation of the desired part, and make targeted edits by paragraph IDs
 
-- When user tells you to just continue working on the project without specifying any particular parts of it, use `get_next_empty_container`/`get_next_empty_container_in_node` to get the node to work on
+- When user tells you to just continue working on the project without specifying any particular parts of it, use `get_empty` to get the node to work on
 
 - When you need to split some node into smaller nodes 
     1. create new empty nodes via `create_*`
-    2. use `get_direct_children` on the parent of nodes to move
+    2. use `get_children` on the parent of nodes to move
     3. use `move_nodes` to move batches of nodes to their new parents
     4. remove previous parent, if it's empty after all changes
 
-- When you need to add children to the beginning of some node, or in the middle
+- When you need to add children to the beginning (or in the middle) of some node
     1. create all new children via `create_*`
-    2. get list of all children via `get_direct_children`
+    2. get list of all children via `get_children`
     3. reorder children via `reorder_children` to use the desired order
+
+- Prefer not reading the whole book with `get_subtree` on `book` node with pruning level `full`, to avoid context poisoning. Better use `render_node` on `book` node to obtain only text representation
 
 - Use other available HNPX MCP tools for appropriate tasks
 
