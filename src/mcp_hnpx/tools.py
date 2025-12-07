@@ -400,30 +400,34 @@ def edit_node_attributes(file_path: str, node_id: str, attributes: dict) -> str:
     return f"Updated attributes for node {node_id}"
 
 
-def remove_node(file_path: str, node_id: str) -> str:
-    """Permanently remove a node and all its descendants
+def remove_nodes(file_path: str, node_ids: list) -> str:
+    """Permanently remove multiple nodes and all their descendants
 
     Args:
         file_path (str): Path to the HNPX document
-        node_id (str): ID of the node to remove
+        node_ids (list): List of node IDs to remove
     """
     tree = hnpx.parse_document(file_path)
-    node = hnpx.find_node(tree, node_id)
+    
+    nodes_removed = 0
+    for node_id in node_ids:
+        node = hnpx.find_node(tree, node_id)
 
-    if node is None:
-        raise NodeNotFoundError(node_id)
+        if node is None:
+            raise NodeNotFoundError(node_id)
 
-    # Check if trying to remove root
-    if node.tag == "book":
-        raise InvalidOperationError("remove_node", "Cannot remove book element")
+        # Check if trying to remove root
+        if node.tag == "book":
+            raise InvalidOperationError("remove_nodes", "Cannot remove book element")
 
-    # Remove node
-    parent = node.getparent()
-    parent.remove(node)
+        # Remove node
+        parent = node.getparent()
+        parent.remove(node)
+        nodes_removed += 1
 
     hnpx.save_document(tree, file_path)
 
-    return f"Removed node {node_id} and its descendants"
+    return f"Removed {nodes_removed} nodes and their descendants"
 
 
 def reorder_children(file_path: str, parent_id: str, child_ids: list) -> str:

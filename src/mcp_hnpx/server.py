@@ -23,7 +23,7 @@ app.tool()(tools.create_paragraph)
 
 # Node Modification Tools
 app.tool()(tools.edit_node_attributes)
-app.tool()(tools.remove_node)
+app.tool()(tools.remove_nodes)
 app.tool()(tools.reorder_children)
 app.tool()(tools.edit_summary)
 app.tool()(tools.edit_paragraph_text)

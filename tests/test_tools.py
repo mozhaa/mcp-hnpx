@@ -204,31 +204,44 @@ def test_edit_node_attributes_cannot_modify_id(complete_xml_path, temp_file):
         tools.edit_node_attributes(temp_file, "3295p0", {"id": "new_id"})
 
 
-def test_remove_node(complete_xml_path, temp_file):
+def test_remove_nodes_single(complete_xml_path, temp_file):
     with open(temp_file, "w") as f:
         f.write(open(complete_xml_path).read())
 
-    tools.remove_node(temp_file, "gr5peb")
+    tools.remove_nodes(temp_file, ["gr5peb"])
 
     tree = tools.hnpx.parse_document(temp_file)
     beat = tools.hnpx.find_node(tree, "gr5peb")
     assert beat is None
 
 
-def test_remove_node_not_found(complete_xml_path, temp_file):
+def test_remove_nodes_multiple(complete_xml_path, temp_file):
+    with open(temp_file, "w") as f:
+        f.write(open(complete_xml_path).read())
+
+    tools.remove_nodes(temp_file, ["gr5peb", "104lac"])
+
+    tree = tools.hnpx.parse_document(temp_file)
+    beat = tools.hnpx.find_node(tree, "gr5peb")
+    sequence = tools.hnpx.find_node(tree, "104lac")
+    assert beat is None
+    assert sequence is None
+
+
+def test_remove_nodes_not_found(complete_xml_path, temp_file):
     with open(temp_file, "w") as f:
         f.write(open(complete_xml_path).read())
 
     with pytest.raises(NodeNotFoundError):
-        tools.remove_node(temp_file, "nonexistent")
+        tools.remove_nodes(temp_file, ["nonexistent"])
 
 
-def test_remove_node_book(complete_xml_path, temp_file):
+def test_remove_nodes_book(complete_xml_path, temp_file):
     with open(temp_file, "w") as f:
         f.write(open(complete_xml_path).read())
 
     with pytest.raises(InvalidOperationError):
-        tools.remove_node(temp_file, "glyjor")
+        tools.remove_nodes(temp_file, ["glyjor"])
 
 
 def test_reorder_children(complete_xml_path, temp_file):
