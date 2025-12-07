@@ -504,9 +504,17 @@ Returns:
 
 ### HNPX MCP TOOL USAGE TIPS
 
-- Before starting new writing task, use `get_subtree` on the `<book>` node with pruning_level of `chapter`/`sequence`, to acquire general book context
+- Before starting new writing task
+    1. acquire book ID via `get_root_id`
+    2. use `get_subtree` on this ID with pruning_level of `chapter`/`sequence`, to acquire general book context
 
-- When user tells you to edit existing text, use `render_node` to get text representation of the desired part, and make targeted edits by paragraph IDs
+- When user tells you to revise existing text, fixing spelling/grammatical errors
+    1. use `render_node` on desired part of the text (or on the whole document) with `show_ids=true`
+    2. deeply analyze the text, and find at all errors
+    3. create a todo list with all found errors
+    4. fix errors step-by-step, updating todo list after each step
+
+- If user asks you to fix errors in the whole book, suggest him to choose a specific chapter
 
 - When user tells you to just continue working on the project without specifying any particular parts of it, use `get_empty` to get the node to work on
 
