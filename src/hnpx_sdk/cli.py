@@ -25,6 +25,12 @@ def parse_args() -> argparse.Namespace:
         help="don't mark chapter/sequence beginnings",
     )
     render_parser.add_argument(
+        "-i",
+        "--interactive",
+        action="store_true",
+        help="interactive mode for fillint the blanks in FB2 metadata",
+    )
+    render_parser.add_argument(
         "-o",
         "--output",
         type=str,
@@ -50,30 +56,71 @@ def parse_args() -> argparse.Namespace:
 
 
 def render(args: argparse.Namespace) -> None:
-    def render_fb2() -> None:
-        raise NotImplementedError()
+    def render_fb2() -> str:
+        from lxml import etree
 
-    def render_plain() -> None:
+        from .hnpx import parse_document
+
+        tree = parse_document(args.file)
+        root = tree.getroot()
+
+        fb2 = etree.Element(
+            "FictionBook", xmlns="http://www.gribuser.ru/xml/fictionbook/2.0"
+        )
+
+        description = etree.SubElement(fb2, "description")
+        title_info = etree.SubElement(description, "title-info")
+        book_title = etree.SubElement(title_info, "book-title")
+        book_title.text = input("Title: ") if args.interactive else "Untitled"
+        body = etree.SubElement(fb2, "body")
+
+        for chapter in root:
+            if chapter.tag == "summary":
+                continue
+            section = etree.SubElement(body, "section")
+            title = etree.SubElement(section, "title")
+            p = etree.SubElement(title, "p")
+            p.text = chapter.get("title")
+            is_first_sequence = True
+            for sequence in chapter:
+                if sequence.tag == "summary":
+                    continue
+                if not is_first_sequence:
+                    sep_p = etree.SubElement(section, "p")
+                    sep_p.text = "***"
+                is_first_sequence = False
+                for beat in sequence:
+                    if beat.tag == "summary":
+                        continue
+                    for paragraph in beat:
+                        if paragraph.tag == "summary":
+                            continue
+                        fb2_p = etree.SubElement(section, "p")
+                        fb2_p.text = (paragraph.text or "").strip()
+
+        return etree.tostring(fb2, encoding="unicode", pretty_print=True)
+
+    def render_plain() -> str:
         from .tools import get_root_id, render_node
 
         root_id = get_root_id(args.file)
-        rendered = render_node(
+        return render_node(
             args.file,
             root_id,
             args.format == "plain_with_ids",
             not args.no_section_marks,
         )
 
-        if args.output:
-            with open(args.output, "w+", encoding="utf-8") as f:
-                f.write(rendered)
-        else:
-            print(rendered)
-
     if args.format == "fb2":
-        render_fb2()
+        result = render_fb2()
     else:
-        render_plain()
+        result = render_plain()
+
+    if args.output:
+        with open(args.output, "w+", encoding="utf-8") as f:
+            f.write(result)
+    else:
+        print(result)
 
 
 def list_tools(args: argparse.Namespace) -> None:
