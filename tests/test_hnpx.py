@@ -161,7 +161,7 @@ def test_render_paragraph_narration():
 def test_render_paragraph_dialogue():
     paragraph = etree.Element("paragraph", mode="dialogue", char="john")
     paragraph.text = "Hello there!"
-    
+
     result = hnpx.render_paragraph(paragraph)
     assert result == "Hello there!"
 
@@ -169,7 +169,7 @@ def test_render_paragraph_dialogue():
 def test_render_paragraph_internal():
     paragraph = etree.Element("paragraph", mode="internal")
     paragraph.text = "This is a thought."
-    
+
     result = hnpx.render_paragraph(paragraph)
     assert result == "This is a thought."
 

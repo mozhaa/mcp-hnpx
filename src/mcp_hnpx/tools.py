@@ -37,7 +37,7 @@ def create_document(file_path: str) -> str:
 
 
 def get_empty(file_path: str, node_id: str) -> str:
-    """Find next container node that needs children within a specific node's subtree (BFS order)
+    """Find next container node without children within a specific node's subtree (BFS order)
 
     Args:
         file_path (str): Path to the HNPX document
@@ -408,7 +408,7 @@ def remove_nodes(file_path: str, node_ids: list) -> str:
         node_ids (list): List of node IDs to remove
     """
     tree = hnpx.parse_document(file_path)
-    
+
     nodes_removed = 0
     for node_id in node_ids:
         node = hnpx.find_node(tree, node_id)
@@ -471,7 +471,7 @@ def reorder_children(file_path: str, parent_id: str, child_ids: list) -> str:
 
 
 def edit_summary(file_path: str, node_id: str, new_summary: str) -> str:
-    """Edit summary text of any element
+    """Edit summary text of a node
 
     Args:
         file_path (str): Path to the HNPX document
@@ -483,6 +483,11 @@ def edit_summary(file_path: str, node_id: str, new_summary: str) -> str:
 
     if node is None:
         raise NodeNotFoundError(node_id)
+
+    if node.tag == "paragraph":
+        raise InvalidOperationError(
+            "edit_summary", "Paragraphs can't contain summaries"
+        )
 
     # Find the summary child element
     summary_elem = node.find("summary")
@@ -499,11 +504,11 @@ def edit_summary(file_path: str, node_id: str, new_summary: str) -> str:
 
 
 def edit_paragraph_text(file_path: str, paragraph_id: str, new_text: str) -> str:
-    """Edit actual paragraph content
+    """Edit paragraph text content
 
     Args:
         file_path (str): Path to the HNPX document
-        paragraph_id (str): ID of the paragraph element to modify
+        node_id (str): ID of the paragraph node to modify
         new_text (str): New paragraph text content
     """
     tree = hnpx.parse_document(file_path)
@@ -602,7 +607,7 @@ def remove_node_children(file_path: str, node_id: str) -> str:
 def _render_paragraphs_recursive(node: etree.Element, show_ids: bool) -> list:
     """Recursively collect all paragraphs from node and its descendants"""
     paragraphs = []
-    
+
     # Check if current node is a paragraph
     if node.tag == "paragraph":
         node_id = node.get("id", "")
@@ -612,17 +617,17 @@ def _render_paragraphs_recursive(node: etree.Element, show_ids: bool) -> list:
                 paragraphs.append(f"[{node_id}] {rendered_text}")
             else:
                 paragraphs.append(rendered_text)
-    
+
     # Recursively process children (excluding summary)
     for child in node:
         if child.tag != "summary":
             paragraphs.extend(_render_paragraphs_recursive(child, show_ids))
-    
+
     return paragraphs
 
 
 def render_node(file_path: str, node_id: str, show_ids: bool = False) -> str:
-    """Render ONLY paragraphs from subtree of current node
+    """Render text representation of the node (only descendent paragraphs)
 
     Args:
         file_path (str): Path to the HNPX document
@@ -630,7 +635,7 @@ def render_node(file_path: str, node_id: str, show_ids: bool = False) -> str:
         show_ids (bool): Whether to show paragraph IDs in square brackets
 
     Returns:
-        str: Formatted text representation of paragraphs from the node's subtree
+        str: Formatted text representation the node
     """
     tree = hnpx.parse_document(file_path)
     node = hnpx.find_node(tree, node_id)
@@ -640,5 +645,3 @@ def render_node(file_path: str, node_id: str, show_ids: bool = False) -> str:
 
     paragraphs = _render_paragraphs_recursive(node, show_ids)
     return "\n\n".join(paragraphs)
-
-
